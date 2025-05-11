@@ -1,5 +1,5 @@
 MODELS
-patients -> CRUD -> id, first, last, email, phone, files
+patients -> CRUD -> id, first, last, email, phone
 doctors -> CRUD -> id, first, last, email, phone, speciality
 labs -> CRUD -> id, type, cost
 medicine -> CRUD -> id, name, cost
