@@ -8,7 +8,6 @@ files -> id, path, mimeType, patient_id, doctor_id
 COMPOSITES
 appointments -> id, start, end, doctor_id, patient_id, lab
 medicine_sold -> id, patient_id, doctor_id, time_sold(use time.now)
-file_belonging -> id, patient_id, doctor_id
 
 FUNCTIONS
 
