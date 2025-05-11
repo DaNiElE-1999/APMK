@@ -9,7 +9,7 @@ const port = Number(process.env.PORT) || 3000;
 
 app.use(express.json());
 app.use(middleware);
-app.use(routes);
+app.use('/api', routes);
 
 async function start(): Promise<void> {
   try {

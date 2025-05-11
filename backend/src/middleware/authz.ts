@@ -4,8 +4,13 @@ import jwt from 'jsonwebtoken';
 import { UserModel } from '../database/models/userModel';
 import { AuthRequest } from '../models/User';
 
-export const userAuthz = asyncHandler(
+const publicPaths = ['/api/login', '/api/register'];
+
+export const authz = asyncHandler(
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    if (publicPaths.includes(req.path) || publicPaths.includes(req.originalUrl)) {
+      return next();
+    }
     const auth = req.headers.authorization;
     if (!auth?.startsWith('Bearer ')) {
       res.status(401).json({ message: 'No token found in the request' });
