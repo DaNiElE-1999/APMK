@@ -3,6 +3,7 @@ import authnRoutes from './auth/authnRoutes'
 import userRoutes from './userRoutes'
 import patientRoutes from './patientRoutes';
 import doctorRoutes from './doctorRoutes';
+import labRoutes from './labRoutes';
 
 const router = Router();
 
@@ -10,5 +11,6 @@ router.use(authnRoutes);
 router.use(userRoutes);
 router.use(patientRoutes);
 router.use(doctorRoutes);
+router.use(labRoutes);
 
 export default router
