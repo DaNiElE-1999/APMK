@@ -7,9 +7,10 @@ import {
   ListDoctorsQuery,
 } from '../models/Doctor';
 
-/* ─────────── PUT /api/doctors  (create) ─────────── */
-export const createDoctor: RequestHandler<{}, {}, CreateDoctorBody> =
-  asyncHandler(async (req, res) => {
+/* ──────────────────────────────────────────────────────────────────── */
+/** PUT /api/doctors  (create) */
+export const createDoctor: RequestHandler<{}, {}, CreateDoctorBody> = asyncHandler(
+  async (req, res): Promise<void> => {
     const { first, last, email, speciality, phone } = req.body;
 
     if (!first || !last || !email || !speciality) {
@@ -17,19 +18,38 @@ export const createDoctor: RequestHandler<{}, {}, CreateDoctorBody> =
       return;
     }
 
-    const exists = await DoctorModel.findOne({ email });
+    /* Uniqueness check */
+    let exists;
+    try {
+      exists = await DoctorModel.findOne({ email });
+    } catch (err) {
+      console.error('[createDoctor] findOne error:', err);
+      res.status(500).json({ message: 'Database error' });
+      return;
+    }
     if (exists) {
       res.status(400).json({ message: 'Doctor already exists' });
       return;
     }
 
-    const doctor = await DoctorModel.create({ first, last, email, speciality, phone });
-    res.status(201).json(doctor);
-  });
+    /* Create doctor */
+    let doctor;
+    try {
+      doctor = await DoctorModel.create({ first, last, email, speciality, phone });
+    } catch (err) {
+      console.error('[createDoctor] create error:', err);
+      res.status(500).json({ message: 'Database error' });
+      return;
+    }
 
-/* ─────────── GET /api/doctors  (list / filter) ─────────── */
-export const listDoctors: RequestHandler<{}, {}, {}, ListDoctorsQuery> =
-  asyncHandler(async (req, res) => {
+    res.status(201).json(doctor);
+  }
+);
+
+/* ──────────────────────────────────────────────────────────────────── */
+/** GET /api/doctors  (list / filter) */
+export const listDoctors: RequestHandler<{}, {}, {}, ListDoctorsQuery> = asyncHandler(
+  async (req, res): Promise<void> => {
     const { first, last, email, phone, speciality, from, to } = req.query;
 
     const filter: Record<string, unknown> = {};
@@ -45,43 +65,85 @@ export const listDoctors: RequestHandler<{}, {}, {}, ListDoctorsQuery> =
       if (to)   (filter.createdAt as any).$lte = new Date(to);
     }
 
-    const doctors = await DoctorModel.find(filter).sort({ createdAt: -1 });
+    let doctors;
+    try {
+      doctors = await DoctorModel.find(filter).sort({ createdAt: -1 });
+    } catch (err) {
+      console.error('[listDoctors] find error:', err);
+      res.status(500).json({ message: 'Database error' });
+      return;
+    }
+
     res.json(doctors);
-  });
+  }
+);
 
-/* ─────────── GET /api/doctors/:id ─────────── */
-export const getDoctor: RequestHandler<{ id: string }> =
-  asyncHandler(async (req, res) => {
-    const doctor = await DoctorModel.findById(req.params.id);
+/* ──────────────────────────────────────────────────────────────────── */
+/** GET /api/doctors/:id */
+export const getDoctor: RequestHandler<{ id: string }> = asyncHandler(
+  async (req, res): Promise<void> => {
+    let doctor;
+    try {
+      doctor = await DoctorModel.findById(req.params.id);
+    } catch (err) {
+      console.error('[getDoctor] findById error:', err);
+      res.status(500).json({ message: 'Database error' });
+      return;
+    }
+
     if (!doctor) {
       res.status(404).json({ message: 'Doctor not found' });
       return;
     }
+
     res.json(doctor);
-  });
+  }
+);
 
-/* ─────────── POST /api/doctors/:id  (update) ─────────── */
-export const updateDoctor: RequestHandler<{ id: string }, {}, UpdateDoctorBody> =
-  asyncHandler(async (req, res) => {
-    const doctor = await DoctorModel.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+/* ──────────────────────────────────────────────────────────────────── */
+/** POST /api/doctors/:id  (update) */
+export const updateDoctor: RequestHandler<{ id: string }, {}, UpdateDoctorBody> = asyncHandler(
+  async (req, res): Promise<void> => {
+    let doctor;
+    try {
+      doctor = await DoctorModel.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true, runValidators: true }
+      );
+    } catch (err) {
+      console.error('[updateDoctor] findByIdAndUpdate error:', err);
+      res.status(500).json({ message: 'Database error' });
+      return;
+    }
+
     if (!doctor) {
       res.status(404).json({ message: 'Doctor not found' });
       return;
     }
+
     res.json(doctor);
-  });
+  }
+);
 
-/* ─────────── DELETE /api/doctors/:id ─────────── */
-export const deleteDoctor: RequestHandler<{ id: string }> =
-  asyncHandler(async (req, res) => {
-    const doctor = await DoctorModel.findByIdAndDelete(req.params.id);
+/* ──────────────────────────────────────────────────────────────────── */
+/** DELETE /api/doctors/:id */
+export const deleteDoctor: RequestHandler<{ id: string }> = asyncHandler(
+  async (req, res): Promise<void> => {
+    let doctor;
+    try {
+      doctor = await DoctorModel.findByIdAndDelete(req.params.id);
+    } catch (err) {
+      console.error('[deleteDoctor] findByIdAndDelete error:', err);
+      res.status(500).json({ message: 'Database error' });
+      return;
+    }
+
     if (!doctor) {
       res.status(404).json({ message: 'Doctor not found' });
       return;
     }
+
     res.json({ message: 'Doctor removed' });
-  });
+  }
+);
