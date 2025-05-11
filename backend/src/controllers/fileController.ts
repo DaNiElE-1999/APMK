@@ -108,25 +108,44 @@ export const listFiles: RequestHandler<{}, {}, {}, ListFilesQuery> = asyncHandle
 /* ───────────────────────────────────────────────────────────── */
 /** GET /api/files/:id */
 export const getFile: RequestHandler<{ id: string }> = asyncHandler(
-  async (req, res) => {
-    let file;
+  async (req, res, next) => {
     try {
-      file = await FileModel
+      const fileDoc = await FileModel
         .findById(req.params.id)
         .populate('patient_id', 'first last email')
-        .populate('doctor_id',  'first last email speciality');
+        .populate('doctor_id', 'first last email speciality')
+        .lean();
+
+      if (!fileDoc) {
+        res.status(404).json({ message: 'File not found' });
+        return;
+      }
+
+      const absolutePath = path.resolve(process.cwd(), fileDoc.path);
+
+      let buffer: Buffer;
+      try {
+        buffer = await fs.promises.readFile(absolutePath);
+      } catch (err) {
+        console.error('[getFile] fs.readFile error:', err);
+        res.status(500).json({ message: 'Error reading file' });
+        return;
+      }
+
+      const base64Data = buffer.toString('base64');
+      res.json({
+        id: fileDoc._id,
+        name: fileDoc.name,
+        mimeType: fileDoc.mimeType,
+        patient_id: fileDoc.patient_id,
+        doctor_id: fileDoc.doctor_id,
+        createdAt: fileDoc.createdAt,
+        updatedAt: fileDoc.updatedAt,
+        data: base64Data
+      });
     } catch (err) {
-      console.error('[getFile] findById error:', err);
-      res.status(500).json({ message: 'Database error' });
-      return;
+      next(err);
     }
-
-    if (!file) {
-      res.status(404).json({ message: 'File not found' });
-      return;
-    }
-
-    res.json(file);
   }
 );
 
