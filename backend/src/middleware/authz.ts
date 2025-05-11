@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { UserModel } from '../database/models/userModel';
 import { AuthRequest } from '../models/User';
 
-export const protect = asyncHandler(
+export const userAuthz = asyncHandler(
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     const auth = req.headers.authorization;
     if (!auth?.startsWith('Bearer ')) {
@@ -27,8 +27,7 @@ export const protect = asyncHandler(
         username:  user.username,
         firstname: user.firstname,
         lastname:  user.lastname,
-        email:     user.email,
-        role:      user.role,
+        email:     user.email
       };
       next();
     } catch (err) {

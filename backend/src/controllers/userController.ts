@@ -6,10 +6,10 @@ import { AuthRequest, LoginBody, RegisterBody } from '../models/User';
 /** POST /api/users/register */
 export const registerUser: RequestHandler<{}, {}, RegisterBody> = asyncHandler(
   async (req, res): Promise<void> => {
-    const { username, firstname, lastname, email, password, role } = req.body;
+    const { username, firstname, lastname, email, password } = req.body;
 
     /* Basic input validation */
-    if (!username || !firstname || !lastname || !email || !password || !role) {
+    if (!username || !firstname || !lastname || !email || !password) {
       res.status(400).json({ message: 'All fields are mandatory' });
       return;
     }
@@ -30,7 +30,7 @@ export const registerUser: RequestHandler<{}, {}, RegisterBody> = asyncHandler(
     /* Create user */
     let user;
     try {
-      user = await UserModel.create({ username, firstname, lastname, email, password, role });
+      user = await UserModel.create({ username, firstname, lastname, email, password });
     } catch (err) {
       console.error('[registerUser] create error:', err);
       res.status(500).json({ message: 'Database error' });
@@ -44,8 +44,7 @@ export const registerUser: RequestHandler<{}, {}, RegisterBody> = asyncHandler(
       firstname: user.firstname,
       lastname:  user.lastname,
       email:     user.email,
-      role:      user.role,
-      token:     UserModel.signToken(user._id.toString(), user.role),
+      token:     UserModel.signToken(user._id.toString()),
     });
   }
 );
@@ -77,8 +76,7 @@ export const loginUser: RequestHandler<{}, {}, LoginBody> = asyncHandler(
       firstname: user.firstname,
       lastname:  user.lastname,
       email:     user.email,
-      role:      user.role,
-      token:     UserModel.signToken(user._id.toString(), user.role),
+      token:     UserModel.signToken(user._id.toString()),
     });
   }
 );

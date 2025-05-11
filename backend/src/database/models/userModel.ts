@@ -14,8 +14,7 @@ const userSchema = new Schema(
     firstname: { type: String, required: true, trim: true },
     lastname:  { type: String, required: true, trim: true },
     email:     { type: String, required: true, unique: true, lowercase: true, trim: true },
-    password:  { type: String, required: true, select: false },
-    role:      { type: String, required: true, trim: true },
+    password:  { type: String, required: true, select: false }
   },
   { timestamps: true }
 );
@@ -27,7 +26,7 @@ export interface UserMethods {
 }
 
 export interface UserStatics {
-  signToken(id: string, role: string): string;
+  signToken(id: string): string;
 }
 
 userSchema.pre('save', async function () {
@@ -48,8 +47,8 @@ userSchema.method('comparePassword', function (raw: string) {
   return bcrypt.compare(raw, this.password);
 });
 
-userSchema.static('signToken', function (id: string, role: string) {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET!, { expiresIn: '24h' });
+userSchema.static('signToken', function (id: string) {
+  return jwt.sign({ id }, process.env.JWT_SECRET!, { expiresIn: '24h' });
 });
 
 export type UserDocument = HydratedDocument<User, UserMethods>;

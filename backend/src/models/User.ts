@@ -5,8 +5,7 @@ export interface IUser {
   firstname: string;
   lastname:  string;
   email:     string;
-  password:  string;
-  role:      string;
+  password:  string
 }
 
 export interface RegisterBody {
@@ -14,8 +13,7 @@ export interface RegisterBody {
   firstname: string;
   lastname:  string;
   email:     string;
-  password:  string;
-  role:      string;
+  password:  string
 }
 
 export interface LoginBody {
@@ -29,7 +27,6 @@ export interface AuthRequest extends Request {
     username:  string;
     firstname: string;
     lastname:  string;
-    email:     string;
-    role:      string;
+    email:     string
   };
 }
