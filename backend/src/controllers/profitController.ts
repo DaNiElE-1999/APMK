@@ -159,7 +159,7 @@ export const profitAll: RequestHandler<{}, {}, {}, ListProfitQuery> = asyncHandl
 
     res.json({
       sale:  saleRes,
-      lab:   labRes,           // e.g. 2200 for your three appointments
+      lab:   labRes,
       total: saleRes + labRes,
     });
   }
