@@ -3,6 +3,7 @@ import asyncHandler       from 'express-async-handler';
 import { MedicineSoldModel } from '../database/models/medicineSoldModel';
 import { AppointmentModel   } from '../database/models/appointmentModel';
 import { ListProfitQuery     } from '../models/Profit';
+import { Types } from 'mongoose';
 
 /** 
  * Helper to build the common match object 
@@ -13,25 +14,29 @@ function buildMatch(
 ): Record<string, unknown> {
   const match: Record<string, unknown> = {};
 
-  if (query.patient_id)  match.patient_id  = query.patient_id;
-  if (query.doctor_id)   match.doctor_id   = query.doctor_id;
-  if (query.medicine_id) match.medicine_id = query.medicine_id;
-  if (query.lab)         match.lab         = query.lab;
+  if (query.patient_id)
+    match.patient_id = new Types.ObjectId(query.patient_id);
+  if (query.doctor_id)
+    match.doctor_id = new Types.ObjectId(query.doctor_id);
+  if (query.medicine_id)
+    match.medicine_id = new Types.ObjectId(query.medicine_id);
 
+  // appointments store the lab ref in `lab`, so map lab_id → lab
+  if (query.lab_id)
+    match.lab = new Types.ObjectId(query.lab_id);
+
+  // optional time‐range filtering
   if (query.from || query.to) {
-    // give TS a clear “dateFilter” type
-    const dateFilter: Record<string, unknown> = {};
-    if (query.from) dateFilter['$gte'] = new Date(query.from);
-    if (query.to)   dateFilter['$lte'] = new Date(query.to);
-
-    match[dateField] = dateFilter;
+    const df: Record<string, unknown> = {};
+    if (query.from) df['$gte'] = new Date(query.from);
+    if (query.to)   df['$lte'] = new Date(query.to);
+    match[dateField] = df;
   }
 
   return match;
 }
 
-/* ──────────────────────────────────────────────────────────────────── */
-/** GET /api/profits/sale */
+//** GET /api/profits/sale */
 export const profitBySale: RequestHandler<{}, {}, {}, ListProfitQuery> = asyncHandler(
   async (req, res) => {
     const match = buildMatch(req.query, 'time_sold');
@@ -62,16 +67,14 @@ export const profitBySale: RequestHandler<{}, {}, {}, ListProfitQuery> = asyncHa
       return;
     }
 
-    const total = result[0]?.total ?? 0;
-    res.json({ total });
+    res.json({ total: result[0]?.total ?? 0 });
   }
 );
 
-/* ──────────────────────────────────────────────────────────────────── */
 /** GET /api/profits/lab */
 export const profitByLab: RequestHandler<{}, {}, {}, ListProfitQuery> = asyncHandler(
   async (req, res) => {
-    const match = buildMatch(req.query, 'start'); // appointments use “start” as date
+    const match = buildMatch(req.query, 'start'); // appointments use ‘start’ for date
 
     let result;
     try {
@@ -99,16 +102,14 @@ export const profitByLab: RequestHandler<{}, {}, {}, ListProfitQuery> = asyncHan
       return;
     }
 
-    const total = result[0]?.total ?? 0;
-    res.json({ total });
+    res.json({ total: result[0]?.total ?? 0 });
   }
 );
 
-/* ──────────────────────────────────────────────────────────────────── */
 /** GET /api/profits/all */
 export const profitAll: RequestHandler<{}, {}, {}, ListProfitQuery> = asyncHandler(
   async (req, res) => {
-    // compute both in parallel
+    // run both aggregations in parallel
     const [saleRes, labRes] = await Promise.all([
       (async () => {
         const match = buildMatch(req.query, 'time_sold');
@@ -116,10 +117,10 @@ export const profitAll: RequestHandler<{}, {}, {}, ListProfitQuery> = asyncHandl
           { $match: match },
           {
             $lookup: {
-              from:         'medicines',
-              localField:   'medicine_id',
+              from:       'medicines',
+              localField: 'medicine_id',
               foreignField: '_id',
-              as:           'med'
+              as:         'med'
             }
           },
           { $unwind: '$med' },
@@ -138,10 +139,10 @@ export const profitAll: RequestHandler<{}, {}, {}, ListProfitQuery> = asyncHandl
           { $match: match },
           {
             $lookup: {
-              from:         'labs',
-              localField:   'lab',
+              from:       'labs',
+              localField: 'lab',
               foreignField: '_id',
-              as:           'lb'
+              as:         'lb'
             }
           },
           { $unwind: '$lb' },
@@ -156,7 +157,10 @@ export const profitAll: RequestHandler<{}, {}, {}, ListProfitQuery> = asyncHandl
       })(),
     ]);
 
-    const total = saleRes + labRes;
-    res.json({ sale: saleRes, lab: labRes, total });
+    res.json({
+      sale:  saleRes,
+      lab:   labRes,           // e.g. 2200 for your three appointments
+      total: saleRes + labRes,
+    });
   }
 );
