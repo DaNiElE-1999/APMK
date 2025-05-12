@@ -12,4 +12,4 @@ medicine_sold -> id, patient_id, doctor_id, time_sold(use time.now)
 FUNCTIONS
 
 GET -> In all functions will be list, filter by any property and also be done by time range
-expenses -> ByTimeRange(req), byPatient(first, last, email), byDoctor(first, last, email)
+profit -> ByTimeRange(req), byPatient(first, last, email), byDoctor(first, last, email), min, max
