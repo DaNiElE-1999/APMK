@@ -64,7 +64,22 @@ export const loginUser: RequestHandler<{}, {}, LoginBody> = asyncHandler(
       return;
     }
 
-    if (!user || !(await user.comparePassword(password))) {
+    if (!user) {
+      res.status(401).json({ message: 'Invalid credentials' });
+      return;
+    }
+
+    /* Verify password */
+    let isMatch: boolean;
+    try {
+      isMatch = await user.comparePassword(password);
+    } catch (err) {
+      console.error('[loginUser] comparePassword error:', err);
+      res.status(500).json({ message: 'Authentication error' });
+      return;
+    }
+
+    if (!isMatch) {
       res.status(401).json({ message: 'Invalid credentials' });
       return;
     }
@@ -80,6 +95,7 @@ export const loginUser: RequestHandler<{}, {}, LoginBody> = asyncHandler(
     });
   }
 );
+
 
 /** GET /api/users/me */
 export const getCurrentUser: RequestHandler = asyncHandler(

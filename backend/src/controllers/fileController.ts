@@ -38,7 +38,13 @@ export const createFile: RequestHandler<{}, {}, CreateFileBody> = asyncHandler(
     const targetPath = path.join(targetDir, filename);
 
     // ensure uploads/ exists
-    await fs.promises.mkdir(targetDir, { recursive: true });
+    try {
+      await fs.promises.mkdir(targetDir, { recursive: true });
+    } catch (err) {
+      console.error('[createFile] mkdir error:', err);
+      res.status(500).json({ message: 'File system error' });
+      return;
+    }
 
     // move temp file
     try {
@@ -68,6 +74,7 @@ export const createFile: RequestHandler<{}, {}, CreateFileBody> = asyncHandler(
     res.status(201).json(fileDoc);
   }
 );
+
 
 /* ───────────────────────────────────────────────────────────── */
 /** GET /api/files  (list / filter) */
