@@ -12,4 +12,4 @@ function decodeBase64ToBuffer(base64Data) {
 }
 
 const pdfBuffer = decodeBase64ToBuffer(data);
-fs.promises.writeFile('output.pdf', pdfBuffer);
+fs.promises.writeFile('output.jpg', pdfBuffer);
