@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaUserMd, FaPills, FaMoneyBill, FaSignOutAlt, FaFlask, FaUserInjured } from "react-icons/fa";
 import { MdSpaceDashboard, MdEventNote } from "react-icons/md";
 import { useAuth } from "../context/AuthContext";
-import "./../styles/dashboard.css"; // nëse ke stil për sidebar këtu
+import "./../styles/dashboard.css"; 
 
 const Sidebar = () => {
   const { logout } = useAuth();

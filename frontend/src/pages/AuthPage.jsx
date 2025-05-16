@@ -6,7 +6,7 @@ import "../styles/auth.css";
 const AuthPage = () => {
   const [mode, setMode] = useState("login");
   const navigate = useNavigate();
-  const { login } = useAuth(); // përdor kontekstin
+  const { login } = useAuth(); 
 
   const [form, setForm] = useState({
     username: "",
@@ -23,7 +23,7 @@ const AuthPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const endpoint = mode === "login" ? "/api/login" : "/api/register"; // korrigjuar
+    const endpoint = mode === "login" ? "/api/login" : "/api/register"; 
 
     const body =
       mode === "login"
@@ -41,7 +41,7 @@ const AuthPage = () => {
       console.log("Përgjigjja nga serveri:", data);
 
       if (res.ok && data.token) {
-        login(data.token, data.username); // ruaj token dhe username në kontekst
+        login(data.token, data.username); 
         navigate("/dashboard");
       } else {
         alert(data.message || "Diçka shkoi keq.");

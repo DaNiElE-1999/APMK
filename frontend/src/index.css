@@ -44,7 +44,6 @@ input, select {
   color: white;
 }
 
-/* App container për stil dark */
 .app.dark {
   background-color: #1e1e2f;
   min-height: 100vh;

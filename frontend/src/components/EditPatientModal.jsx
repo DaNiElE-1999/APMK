@@ -1,4 +1,3 @@
-// src/components/EditPatientModal.jsx
 import React, { useState, useEffect } from "react";
 
 const EditPatientModal = ({ onClose, patient, onSubmit }) => {

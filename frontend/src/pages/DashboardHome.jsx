@@ -11,11 +11,10 @@ import {
 } from "react-icons/fa";
 
 const DashboardHome = () => {
-  // Vlerat do vijnë nga backend më vonë
   const stats = [
     {
       title: "Total Patients",
-      value: "", // bosh për tani
+      value: "", 
       icon: <FaUserInjured />,
       color: "#00bcd4",
     },
