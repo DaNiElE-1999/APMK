@@ -1,22 +1,52 @@
-/* index.css - stilizim bazë global */
+/* src/index.css */
+
+/* Reset stile bazë për të gjitha elementet */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f6f8;
-    color: #1e293b;
-  }
-  
-  a {
-    text-decoration: none;
-    color: inherit;
-  }
-  
-  input, button {
-    font-family: inherit;
-  }
-  
-  button {
-    cursor: pointer;
-  }
-  
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #121212;
+  color: #ffffff;
+  line-height: 1.6;
+}
+
+/* Link stil modern */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Buttons */
+button {
+  font-family: inherit;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #2e3b4e;
+  color: #ffffff;
+  transition: background-color 0.2s ease-in-out;
+}
+button:hover {
+  background-color: #3c4d65;
+}
+
+/* Inpute */
+input, select {
+  padding: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid #444;
+  background-color: #1e1e2f;
+  color: white;
+}
+
+/* App container për stil dark */
+.app.dark {
+  background-color: #1e1e2f;
+  min-height: 100vh;
+  padding: 1rem;
+}

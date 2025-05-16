@@ -1,4 +1,3 @@
-// src/pages/AuthPage.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/auth.css";
@@ -21,10 +20,8 @@ const AuthPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const endpoint =
-      mode === "login" ? "/api/auth/login" : "/api/auth/register";
+    const endpoint = mode === "login" ? "/auth/login" : "/auth/register";
 
-    // Build body depending on mode
     const body =
       mode === "login"
         ? { username: form.username, password: form.password }
@@ -38,16 +35,18 @@ const AuthPage = () => {
       });
 
       const data = await res.json();
+      console.log("Përgjigjja nga serveri:", data);
 
       if (res.ok && data.token) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("username", data.username);
+        console.log("Token i ruajtur:", localStorage.getItem("token"));
         navigate("/dashboard");
       } else {
-        alert(data.message || "Something went wrong");
+        alert(data.message || "Diçka shkoi keq.");
       }
     } catch (err) {
-      alert("Error: " + err.message);
+      alert("Gabim: " + err.message);
     }
   };
 
@@ -106,7 +105,9 @@ const AuthPage = () => {
         </form>
 
         <div className="auth-toggle">
-          {mode === "login" ? "Don't have an account?" : "Already registered?"}{" "}
+          {mode === "login"
+            ? "Don't have an account?"
+            : "Already registered?"}{" "}
           <button
             onClick={() =>
               setMode((prev) => (prev === "login" ? "register" : "login"))

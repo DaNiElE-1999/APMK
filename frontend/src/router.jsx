@@ -1,26 +1,43 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
-import Patients from './pages/Patients';
-import Appointments from './pages/Appointments';
-import Prescriptions from './pages/Prescriptions';
-import Statistics from './pages/Statistics';
-import Login from './pages/Login';
-import Register from './pages/Register';
+// src/router.jsx
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import AuthPage from "./pages/AuthPage";
+import DashboardHome from "./pages/DashboardHome";
+import AppointmentsPage from "./pages/AppointmentsPage";
+import DoctorPages from "./pages/DoctorPages";
+import LabsPage from "./pages/LabsPage";
+import MedicinesPages from "./pages/MedicinesPages";
+import MedicineSoldPage from "./pages/MedicineSoldPage";
+import PatientsPage from "./pages/PatientsPage";
+import ProfitPage from "./pages/ProfitPage";
+import { useAuth } from "./context/AuthContext";
 
-function AppRouter() {
+const AppRouter = () => {
+  const { token } = useAuth();
+
   return (
     <Routes>
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/patients" element={<Patients />} />
-      <Route path="/appointments" element={<Appointments />} />
-      <Route path="/prescriptions" element={<Prescriptions />} />
-      <Route path="/statistics" element={<Statistics />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="*" element={<Dashboard />} /> {/* default fallback */}
+      {!token ? (
+        <>
+          <Route path="/" element={<AuthPage />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </>
+      ) : (
+        <>
+          <Route path="/" element={<DashboardHome />} />
+          <Route path="/dashboard" element={<DashboardHome />} />
+          <Route path="/appointments" element={<AppointmentsPage />} />
+          <Route path="/doctors" element={<DoctorPages />} />
+          <Route path="/labs" element={<LabsPage />} />
+          <Route path="/medicines" element={<MedicinesPages />} />
+          <Route path="/medicines-sold" element={<MedicineSoldPage />} />
+          <Route path="/patients" element={<PatientsPage />} />
+          <Route path="/profit" element={<ProfitPage />} />
+          <Route path="*" element={<Navigate to="/dashboard" />} />
+        </>
+      )}
     </Routes>
   );
-}
+};
 
 export default AppRouter;
