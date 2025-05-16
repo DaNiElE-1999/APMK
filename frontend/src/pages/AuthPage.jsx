@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import "../styles/auth.css";
 
 const AuthPage = () => {
   const [mode, setMode] = useState("login");
   const navigate = useNavigate();
+  const { login } = useAuth(); // përdor kontekstin
+
   const [form, setForm] = useState({
     username: "",
     password: "",
@@ -20,7 +23,7 @@ const AuthPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const endpoint = mode === "login" ? "/auth/login" : "/auth/register";
+    const endpoint = mode === "login" ? "/api/login" : "/api/register"; // korrigjuar
 
     const body =
       mode === "login"
@@ -38,9 +41,7 @@ const AuthPage = () => {
       console.log("Përgjigjja nga serveri:", data);
 
       if (res.ok && data.token) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("username", data.username);
-        console.log("Token i ruajtur:", localStorage.getItem("token"));
+        login(data.token, data.username); // ruaj token dhe username në kontekst
         navigate("/dashboard");
       } else {
         alert(data.message || "Diçka shkoi keq.");
