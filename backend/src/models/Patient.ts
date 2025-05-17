@@ -3,6 +3,7 @@ export interface IPatient {
   last:   string;
   email:  string;
   phone?: string;
+  age: number;
 }
 
 /* ────── Request bodies ────── */
@@ -15,6 +16,12 @@ export interface ListPatientsQuery {
   last?:  string;
   email?: string;
   phone?: string;
+
+  /* Age filters */
+  age?: string;               // exact
+  minAge?: string;            // range lower-bound
+  maxAge?: string;            // range upper-bound
+
   from?:  string;   // ISO date – createdAt >= from
   to?:    string;   // ISO date – createdAt <= to
 }

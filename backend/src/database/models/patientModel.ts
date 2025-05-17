@@ -12,16 +12,15 @@ const patientSchema = new Schema(
     last:   { type: String, required: true, trim: true },
     email:  { type: String, required: true, unique: true, lowercase: true, trim: true },
     phone:  { type: String, trim: true },
+    age:    { type: Number, required: true, min: 0 },
   },
   { timestamps: true }
 );
 
-/* -----  Type exports  -------------------------------------------------- */
 export type Patient           = InferSchemaType<typeof patientSchema>;
 export type PatientDocument   = HydratedDocument<Patient>;
 export type PatientModelType  = Model<Patient>;
 
-/* -----  Model export  --------------------------------------------------- */
 export const PatientModel: PatientModelType = model<Patient>(
   'Patient',
   patientSchema
