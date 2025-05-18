@@ -46,9 +46,9 @@ export const listAppointments: RequestHandler<
   {},
   {},
   ListAppointmentsQuery & {
-    speciality?: string;   // doctor speciality filter
-    ageMin?: string;       // patient age lower bound
-    ageMax?: string;       // patient age upper bound
+    speciality?: string;
+    ageMin?: string;
+    ageMax?: string;
   }
 > = asyncHandler(async (req, res) => {
   const {
@@ -62,78 +62,113 @@ export const listAppointments: RequestHandler<
     ageMax,
   } = req.query;
 
-  const match: Record<string, unknown> = {};
-  if (doctor_id)  match.doctor_id  = new Types.ObjectId(doctor_id);
-  if (patient_id) match.patient_id = new Types.ObjectId(patient_id);
-  if (lab)        match.lab        = new Types.ObjectId(lab);
+  const errors: string[] = [];
 
-  if (from || to) {
+  function asObjectId(id: string | undefined, label: string) {
+    if (!id) return undefined;
+    if (!Types.ObjectId.isValid(id)) {
+      errors.push(`${label} is not a valid ObjectId`);
+      return undefined;
+    }
+    return new Types.ObjectId(id);
+  }
+
+  function asDateISO(str: string | undefined, label: string) {
+    if (!str) return undefined;
+    const d = new Date(str);
+    if (Number.isNaN(d.getTime())) {
+      errors.push(`${label} is not a valid ISO date`);
+      return undefined;
+    }
+    return d;
+  }
+
+  function asNumber(str: string | undefined, label: string) {
+    if (str == null) return undefined;
+    const n = Number(str);
+    if (!Number.isFinite(n)) {
+      errors.push(`${label} is not a valid number`);
+      return undefined;
+    }
+    return n;
+  }
+
+  const doctorId  = asObjectId(doctor_id,  'doctor_id');
+  const patientId = asObjectId(patient_id, 'patient_id');
+  const labId     = asObjectId(lab,        'lab');
+
+  const fromDate  = asDateISO(from, 'from');
+  const toDate    = asDateISO(to,   'to');
+
+  const ageMinN   = asNumber(ageMin, 'ageMin');
+  const ageMaxN   = asNumber(ageMax, 'ageMax');
+
+  if (errors.length) {
+    res.status(400).json({ errors });
+    return;
+  }
+
+  const match: Record<string, unknown> = {};
+  if (doctorId)  match.doctor_id  = doctorId;
+  if (patientId) match.patient_id = patientId;
+  if (labId)     match.lab        = labId;
+
+  if (fromDate || toDate) {
     match.start = {};
-    if (from) (match.start as any).$gte = new Date(from);
-    if (to)   (match.start as any).$lte = new Date(to);
+    if (fromDate) (match.start as any).$gte = fromDate;
+    if (toDate)   (match.start as any).$lte = toDate;
   }
 
   const pipeline: any[] = [{ $match: match }];
 
   pipeline.push(
-    {
-      $lookup: {
+    { $lookup: {
         from: 'doctors',
         localField: 'doctor_id',
         foreignField: '_id',
         as: 'doctor',
-      },
-    },
+      }},
     { $unwind: '$doctor' }
   );
 
-  /* Optional doctor speciality filter */
   if (speciality) {
     pipeline.push({
       $match: {
-        'doctor.speciality': {
-          $regex: new RegExp(`^${speciality}$`, 'i'), // case-insensitive
-        },
+        'doctor.speciality': { $regex: new RegExp(`^${speciality}$`, 'i') },
       },
     });
   }
 
   pipeline.push(
-    {
-      $lookup: {
+    { $lookup: {
         from: 'patients',
         localField: 'patient_id',
         foreignField: '_id',
         as: 'patient',
-      },
-    },
+      }},
     { $unwind: '$patient' }
   );
 
-  /* Optional patient age range filter */
-  if (ageMin || ageMax) {
+  if (ageMinN != null || ageMaxN != null) {
     const ageCond: any = {};
-    if (ageMin) ageCond.$gte = Number(ageMin);
-    if (ageMax) ageCond.$lte = Number(ageMax);
+    if (ageMinN != null) ageCond.$gte = ageMinN;
+    if (ageMaxN != null) ageCond.$lte = ageMaxN;
     pipeline.push({ $match: { 'patient.age': ageCond } });
   }
 
   pipeline.push(
-    {
-      $lookup: {
+    { $lookup: {
         from: 'labs',
         localField: 'lab',
         foreignField: '_id',
         as: 'lab',
-      },
-    },
+      }},
     { $unwind: { path: '$lab', preserveNullAndEmptyArrays: true } }
   );
 
   pipeline.push(
     { $sort: { start: -1 } },
-    {
-      $project: {
+    { $project: {
         _id: 1,
         start: 1,
         end: 1,
@@ -142,8 +177,7 @@ export const listAppointments: RequestHandler<
         doctor:  { _id: 1, first: 1, last: 1, email: 1, speciality: 1 },
         patient: { _id: 1, first: 1, last: 1, email: 1, age: 1 },
         lab:     { _id: 1, type: 1, cost: 1 },
-      },
-    }
+      }},
   );
 
   try {
