@@ -19,8 +19,8 @@ export interface ListPatientsQuery {
 
   /* Age filters */
   age?: string;               // exact
-  minAge?: string;            // range lower-bound
-  maxAge?: string;            // range upper-bound
+  ageMin?: string;            // range lower-bound
+  ageMax?: string;            // range upper-bound
 
   from?:  string;   // ISO date – createdAt >= from
   to?:    string;   // ISO date – createdAt <= to

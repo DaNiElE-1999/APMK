@@ -63,8 +63,8 @@ export const listPatients: RequestHandler<{}, {}, {}, ListPatientsQuery> = async
       email,
       phone,
       age,
-      minAge,
-      maxAge,
+      ageMin,
+      ageMax,
       from,
       to,
     } = req.query;
@@ -78,10 +78,10 @@ export const listPatients: RequestHandler<{}, {}, {}, ListPatientsQuery> = async
 
     if (age) {
       filter.age = Number(age);
-    } else if (minAge || maxAge) {
+    } else if (ageMin || ageMax) {
       filter.age = {};
-      if (minAge) (filter.age as any).$gte = Number(minAge);
-      if (maxAge) (filter.age as any).$lte = Number(maxAge);
+      if (ageMin) (filter.age as any).$gte = Number(ageMin);
+      if (ageMax) (filter.age as any).$lte = Number(ageMax);
     }
 
     if (from || to) {
