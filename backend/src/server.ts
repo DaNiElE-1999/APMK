@@ -1,16 +1,11 @@
 import express from 'express';
 import 'dotenv/config';
-import cors from 'cors';
 import { connectDB } from './database/connection';
 import middleware from './middleware';
 import routes from './routes';
 
 const app  = express();
 const port = Number(process.env.PORT) || 3000;
-
-app.use(cors({
-  origin: "http://localhost:5173", //shto ne middleware Daniele
-}));
 
 app.use(express.json());
 app.use(middleware);
