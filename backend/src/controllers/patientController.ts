@@ -11,11 +11,17 @@ import {
 /** PUT /api/patients (create) */
 export const createPatient: RequestHandler<{}, {}, CreatePatientBody> = asyncHandler(
   async (req, res): Promise<void> => {
-    const { first, last, email, phone } = req.body;
+    const { first, last, email, phone, age } = req.body;
 
     /* Basic validation */
-    if (!first || !last || !email) {
-      res.status(400).json({ message: 'first, last and email are mandatory' });
+    if (!first || !last || !email || age == null) {
+      res
+        .status(400)
+        .json({ message: 'first, last, email and age are mandatory' });
+      return;
+    }
+    if (age < 0) {
+      res.status(400).json({ message: 'age must be ≥ 0' });
       return;
     }
 
@@ -36,7 +42,7 @@ export const createPatient: RequestHandler<{}, {}, CreatePatientBody> = asyncHan
     /* Create patient */
     let patient;
     try {
-      patient = await PatientModel.create({ first, last, email, phone });
+      patient = await PatientModel.create({ first, last, email, phone, age });
     } catch (err) {
       console.error('[createPatient] create error:', err);
       res.status(500).json({ message: 'Database error' });
@@ -51,7 +57,17 @@ export const createPatient: RequestHandler<{}, {}, CreatePatientBody> = asyncHan
 /** GET /api/patients?… (list + filter) */
 export const listPatients: RequestHandler<{}, {}, {}, ListPatientsQuery> = asyncHandler(
   async (req, res): Promise<void> => {
-    const { first, last, email, phone, from, to } = req.query;
+    const {
+      first,
+      last,
+      email,
+      phone,
+      age,
+      ageMin,
+      ageMax,
+      from,
+      to,
+    } = req.query;
 
     /* Build dynamic filter */
     const filter: Record<string, unknown> = {};
@@ -59,6 +75,14 @@ export const listPatients: RequestHandler<{}, {}, {}, ListPatientsQuery> = async
     if (last)   filter.last   = new RegExp(last,  'i');
     if (email)  filter.email  = new RegExp(email, 'i');
     if (phone)  filter.phone  = new RegExp(phone, 'i');
+
+    if (age) {
+      filter.age = Number(age);
+    } else if (ageMin || ageMax) {
+      filter.age = {};
+      if (ageMin) (filter.age as any).$gte = Number(ageMin);
+      if (ageMax) (filter.age as any).$lte = Number(ageMax);
+    }
 
     if (from || to) {
       filter.createdAt = {};

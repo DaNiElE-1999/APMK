@@ -42,44 +42,109 @@ export const createMedicineSold: RequestHandler<{}, {}, CreateMedicineSoldBody> 
 );
 
 /* ── GET /api/medicine_sold (list / filter) ── */
-export const listMedicineSold: RequestHandler<{}, {}, {}, ListMedicineSoldQuery> = asyncHandler(
-  async (req, res) => {
-    const { patient_id, doctor_id, medicine_id, quantityMin, quantityMax, from, to } = req.query;
+export const listMedicineSold: RequestHandler<
+  {},
+  {},
+  {},
+  ListMedicineSoldQuery & { ageMin?: string; ageMax?: string }
+> = asyncHandler(async (req, res) => {
+  const {
+    patient_id,
+    doctor_id,
+    medicine_id,
+    quantityMin,
+    quantityMax,
+    from,
+    to,
+    ageMin,
+    ageMax,
+  } = req.query;
 
-    const filter: Record<string, unknown> = {};
-    if (patient_id)  filter.patient_id  = patient_id;
-    if (doctor_id)   filter.doctor_id   = doctor_id;
-    if (medicine_id) filter.medicine_id = medicine_id;
+  const match: Record<string, unknown> = {};
+  if (patient_id)  match.patient_id  = patient_id;
+  if (doctor_id)   match.doctor_id   = doctor_id;
+  if (medicine_id) match.medicine_id = medicine_id;
 
-    if (quantityMin || quantityMax) {
-      filter.quantity = {};
-      if (quantityMin) (filter.quantity as any).$gte = Number(quantityMin);
-      if (quantityMax) (filter.quantity as any).$lte = Number(quantityMax);
-    }
-
-    if (from || to) {
-      filter.time_sold = {};
-      if (from) (filter.time_sold as any).$gte = new Date(from);
-      if (to)   (filter.time_sold as any).$lte = new Date(to);
-    }
-
-    let sold;
-    try {
-      sold = await MedicineSoldModel
-        .find(filter)
-        .populate('patient_id',  'first last email')
-        .populate('doctor_id',   'first last email speciality')
-        .populate('medicine_id', 'name cost')
-        .sort({ time_sold: -1 });
-    } catch (err) {
-      console.error('[listMedicineSold] find error:', err);
-      res.status(500).json({ message: 'Database error' });
-      return;
-    }
-
-    res.json(sold);
+  if (quantityMin || quantityMax) {
+    match.quantity = {};
+    if (quantityMin) (match.quantity as any).$gte = Number(quantityMin);
+    if (quantityMax) (match.quantity as any).$lte = Number(quantityMax);
   }
-);
+
+  if (from || to) {
+    match.time_sold = {};
+    if (from) (match.time_sold as any).$gte = new Date(from);
+    if (to)   (match.time_sold as any).$lte = new Date(to);
+  }
+
+  const pipeline: any[] = [{ $match: match }];
+
+  /* Join patients so we can filter by age */
+  pipeline.push(
+    {
+      $lookup: {
+        from: 'patients',
+        localField: 'patient_id',
+        foreignField: '_id',
+        as: 'patient',
+      },
+    },
+    { $unwind: '$patient' }
+  );
+
+  /* Optional age filter */
+  if (ageMin || ageMax) {
+    const ageCond: any = {};
+    if (ageMin) ageCond.$gte = Number(ageMin);
+    if (ageMax) ageCond.$lte = Number(ageMax);
+    pipeline.push({ $match: { 'patient.age': ageCond } });
+  }
+
+  /* Add doctors & medicines for a fully-hydrated response */
+  pipeline.push(
+    {
+      $lookup: {
+        from: 'doctors',
+        localField: 'doctor_id',
+        foreignField: '_id',
+        as: 'doctor',
+      },
+    },
+    { $unwind: '$doctor' },
+    {
+      $lookup: {
+        from: 'medicines',
+        localField: 'medicine_id',
+        foreignField: '_id',
+        as: 'medicine',
+      },
+    },
+    { $unwind: '$medicine' },
+    { $sort: { time_sold: -1 } },
+
+    {
+      $project: {
+        _id: 1,
+        quantity: 1,
+        time_sold: 1,
+        patient:  { _id: 1, first: 1, last: 1, email: 1, age: 1 },
+        doctor:   { _id: 1, first: 1, last: 1, email: 1, speciality: 1 },
+        medicine: { _id: 1, name: 1, cost: 1 },
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    }
+  );
+
+  try {
+    const sold = await MedicineSoldModel.aggregate(pipeline);
+    res.json(sold);
+  } catch (err) {
+    console.error('[listMedicineSold] aggregate error:', err);
+    res.status(500).json({ message: 'Database error' });
+  }
+});
+
 
 /* ─────────────────────────────────────────────────────────────── */
 /** GET /api/medicine_sold/:id */

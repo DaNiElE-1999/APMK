@@ -14,6 +14,11 @@ const medicineSchema = new Schema(
   { timestamps: true }
 );
 
+medicineSchema.index(
+  { name: 1 },
+  { unique: true, collation: { locale: 'en', strength: 2 } }
+);
+
 export type Medicine          = InferSchemaType<typeof medicineSchema>;
 export type MedicineDocument  = HydratedDocument<Medicine>;
 export type MedicineModelType = Model<Medicine>;
