@@ -1,19 +1,10 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import "../styles/dashboard.css";
 
 const Topbar = () => {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();           
-    navigate("/login"); 
-  };
-
   return (
     <div className="topbar">
-      <button onClick={handleLogout}>Logout</button>
+      {/* Mund të shtosh input kërkimi ose thjesht lëre bosh për tani */}
     </div>
   );
 };
