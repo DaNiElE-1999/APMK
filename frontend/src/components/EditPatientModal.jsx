@@ -1,68 +1,82 @@
-import React, { useState, useEffect } from "react";
+// src/components/patients/EditPatientModal.jsx
+import React, { useState } from "react";
+import axios from "axios";
 
-const EditPatientModal = ({ onClose, patient, onSubmit }) => {
-  const [form, setForm] = useState({
-    first: "",
-    last: "",
-    email: "",
-    phone: "",
-  });
+const EditPatientModal = ({ patient, onClose, onRefresh }) => {
+  const [form, setForm] = useState({ ...patient });
 
-  useEffect(() => {
-    if (patient) {
-      setForm({
-        first: patient.first,
-        last: patient.last,
-        email: patient.email,
-        phone: patient.phone || "",
-      });
-    }
-  }, [patient]);
-
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await onSubmit(form);
-    onClose();
+    try {
+      await axios.post(`/api/patient/${patient._id}`, {
+        ...form,
+        age: parseInt(form.age),
+      });
+      onRefresh();
+      onClose();
+    } catch (err) {
+      console.error("Gabim në përditësim", err);
+    }
   };
 
   return (
-    <div style={overlayStyle}>
-      <form onSubmit={handleSubmit} style={formStyle}>
-        <h2 style={{ color: "#00bcd4" }}>Edit Patient</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-[#1e293b] p-6 rounded w-full max-w-md text-white space-y-4"
+      >
+        <h2 className="text-xl font-bold mb-4">Edito Pacient</h2>
 
-        <input name="first" value={form.first} onChange={handleChange} placeholder="First Name" required style={inputStyle} />
-        <input name="last" value={form.last} onChange={handleChange} placeholder="Last Name" required style={inputStyle} />
-        <input name="email" value={form.email} onChange={handleChange} placeholder="Email" required style={inputStyle} />
-        <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" style={inputStyle} />
+        <input
+          type="text"
+          name="first"
+          value={form.first}
+          onChange={handleChange}
+          className="w-full p-2 bg-[#334155] rounded"
+        />
+        <input
+          type="text"
+          name="last"
+          value={form.last}
+          onChange={handleChange}
+          className="w-full p-2 bg-[#334155] rounded"
+        />
+        <input
+          type="email"
+          name="email"
+          value={form.email}
+          onChange={handleChange}
+          className="w-full p-2 bg-[#334155] rounded"
+        />
+        <input
+          type="text"
+          name="phone"
+          value={form.phone}
+          onChange={handleChange}
+          className="w-full p-2 bg-[#334155] rounded"
+        />
+        <input
+          type="number"
+          name="age"
+          value={form.age}
+          onChange={handleChange}
+          className="w-full p-2 bg-[#334155] rounded"
+        />
 
-        <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end", gap: 10 }}>
-          <button type="button" onClick={onClose} className="add-button" style={{ backgroundColor: "#607d8b" }}>
-            Cancel
+        <div className="flex justify-end gap-4">
+          <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-600 rounded">
+            Anulo
           </button>
-          <button type="submit" className="add-button">Save</button>
+          <button type="submit" className="px-4 py-2 bg-yellow-600 rounded">
+            Përditëso
+          </button>
         </div>
       </form>
     </div>
   );
-};
-
-const overlayStyle = {
-  position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-  backgroundColor: "rgba(0, 0, 0, 0.5)", display: "flex",
-  alignItems: "center", justifyContent: "center", zIndex: 999
-};
-
-const formStyle = {
-  backgroundColor: "#1b2a41", padding: 30, borderRadius: 10, width: "400px"
-};
-
-const inputStyle = {
-  width: "100%", padding: "10px", marginBottom: "10px",
-  borderRadius: "6px", border: "none", backgroundColor: "#32455a", color: "#fff"
 };
 
 export default EditPatientModal;

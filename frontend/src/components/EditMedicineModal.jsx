@@ -1,39 +1,59 @@
-import React, { useState, useEffect } from "react";
+// src/components/medicines/EditMedicineModal.jsx
+import React, { useState } from "react";
+import axios from "axios";
 
-const EditMedicineModal = ({ medicine, onClose, onSubmit }) => {
-  const [form, setForm] = useState({ name: "", cost: "" });
-
-  useEffect(() => {
-    if (medicine) {
-      setForm({
-        name: medicine.name || "",
-        cost: medicine.cost?.toString() || "",
-      });
-    }
-  }, [medicine]);
+const EditMedicineModal = ({ medicine, onClose, onRefresh }) => {
+  const [form, setForm] = useState({ ...medicine });
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.cost) {
-      alert("All fields are required");
-      return;
+    try {
+      await axios.post(`/api/medicine/${medicine._id}`, {
+        name: form.name,
+        cost: parseFloat(form.cost),
+      });
+      onRefresh();
+      onClose();
+    } catch (err) {
+      console.error("Gabim në përditësim", err);
     }
-    await onSubmit({ name: form.name, cost: parseFloat(form.cost) });
-    onClose();
   };
 
   return (
-    <div style={overlayStyle}>
-      <form onSubmit={handleSubmit} style={formStyle}>
-        <h2 style={{ color: "#00bcd4" }}>Edit Medicine</h2>
-        <input name="name" placeholder="Name" value={form.name} onChange={handleChange} required style={inputStyle} />
-        <input name="cost" type="number" placeholder="Cost (€)" value={form.cost} onChange={handleChange} required style={inputStyle} />
-        <div style={buttonWrapperStyle}>
-          <button type="button" onClick={onClose} className="add-button" style={{ backgroundColor: "#607d8b" }}>Cancel</button>
-          <button type="submit" className="add-button">Save</button>
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-[#1e293b] p-6 rounded w-full max-w-md text-white space-y-4"
+      >
+        <h2 className="text-xl font-bold mb-4">Edito Medikament</h2>
+
+        <input
+          type="text"
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          placeholder="Emri"
+          className="w-full p-2 bg-[#334155] rounded"
+        />
+        <input
+          type="number"
+          name="cost"
+          value={form.cost}
+          onChange={handleChange}
+          placeholder="Çmimi"
+          className="w-full p-2 bg-[#334155] rounded"
+        />
+
+        <div className="flex justify-end gap-4">
+          <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-600 rounded">
+            Anulo
+          </button>
+          <button type="submit" className="px-4 py-2 bg-yellow-600 rounded">
+            Përditëso
+          </button>
         </div>
       </form>
     </div>

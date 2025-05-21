@@ -1,6 +1,8 @@
+// src/components/medicines/AddMedicineModal.jsx
 import React, { useState } from "react";
+import axios from "axios";
 
-const AddMedicineModal = ({ onClose, onSubmit }) => {
+const AddMedicineModal = ({ onClose, onRefresh }) => {
   const [form, setForm] = useState({ name: "", cost: "" });
 
   const handleChange = (e) =>
@@ -8,46 +10,56 @@ const AddMedicineModal = ({ onClose, onSubmit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.cost) {
-      alert("All fields are required");
-      return;
+    try {
+      await axios.put("/api/medicine", {
+        name: form.name,
+        cost: parseFloat(form.cost),
+      });
+      onRefresh();
+      onClose();
+    } catch (err) {
+      console.error("Gabim në shtim", err);
     }
-    await onSubmit({ name: form.name, cost: parseFloat(form.cost) });
-    onClose();
   };
 
   return (
-    <div style={overlayStyle}>
-      <form onSubmit={handleSubmit} style={formStyle}>
-        <h2 style={{ color: "#00bcd4" }}>Add Medicine</h2>
-        <input name="name" placeholder="Name" value={form.name} onChange={handleChange} required style={inputStyle} />
-        <input name="cost" type="number" placeholder="Cost (€)" value={form.cost} onChange={handleChange} required style={inputStyle} />
-        <div style={buttonWrapperStyle}>
-          <button type="button" onClick={onClose} className="add-button" style={{ backgroundColor: "#607d8b" }}>Cancel</button>
-          <button type="submit" className="add-button">Add</button>
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-[#1e293b] p-6 rounded w-full max-w-md text-white space-y-4"
+      >
+        <h2 className="text-xl font-bold mb-4">Shto Medikament</h2>
+
+        <input
+          type="text"
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          placeholder="Emri i barit"
+          required
+          className="w-full p-2 bg-[#334155] rounded"
+        />
+        <input
+          type="number"
+          name="cost"
+          value={form.cost}
+          onChange={handleChange}
+          placeholder="Çmimi"
+          required
+          className="w-full p-2 bg-[#334155] rounded"
+        />
+
+        <div className="flex justify-end gap-4">
+          <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-600 rounded">
+            Anulo
+          </button>
+          <button type="submit" className="px-4 py-2 bg-green-600 rounded">
+            Shto
+          </button>
         </div>
       </form>
     </div>
   );
-};
-
-const overlayStyle = {
-  position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-  backgroundColor: "rgba(0, 0, 0, 0.5)", display: "flex",
-  alignItems: "center", justifyContent: "center", zIndex: 999,
-};
-
-const formStyle = {
-  backgroundColor: "#1b2a41", padding: 30, borderRadius: 10, width: "400px",
-};
-
-const inputStyle = {
-  width: "100%", padding: "10px", marginBottom: "10px",
-  borderRadius: "6px", border: "none", backgroundColor: "#32455a", color: "#fff",
-};
-
-const buttonWrapperStyle = {
-  marginTop: 20, display: "flex", justifyContent: "flex-end", gap: 10,
 };
 
 export default AddMedicineModal;

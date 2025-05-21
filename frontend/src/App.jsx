@@ -1,3 +1,4 @@
+// src/App.jsx
 import React from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import AppRouter from "./router";
@@ -6,13 +7,13 @@ import "./index.css";
 
 function App() {
   return (
-    <AuthProvider>
-      <div className="app dark">
-        <Router>
+    <Router>
+      <AuthProvider>
+        <div className="app dark">
           <AppRouter />
-        </Router>
-      </div>
-    </AuthProvider>
+        </div>
+      </AuthProvider>
+    </Router>
   );
 }
 

@@ -1,8 +1,8 @@
 // src/pages/DashboardHome.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "../utils/axios";
 import DashboardLayout from "../layout/DashboardLayout";
 import StatCard from "../components/StatCard";
-import "../styles/dashboard.css";
 import {
   FaUserInjured,
   FaCalendarCheck,
@@ -11,28 +11,63 @@ import {
 } from "react-icons/fa";
 
 const DashboardHome = () => {
-  const stats = [
+  const [stats, setStats] = useState({
+    patients: 0,
+    appointmentsToday: 0,
+    monthlyRevenue: 0,
+    profitGrowth: 0,
+  });
+
+  const fetchStats = async () => {
+    try {
+      const [patientsRes, appointmentsRes, profitRes] = await Promise.all([
+        axios.get("/api/patient"),
+        axios.get("/api/appointments", {
+          params: {
+            from: new Date().toISOString().slice(0, 10),
+            to: new Date().toISOString().slice(0, 10),
+          },
+        }),
+        axios.get("/api/profits/all"),
+      ]);
+
+      setStats({
+        patients: patientsRes.data.length,
+        appointmentsToday: appointmentsRes.data.length,
+        monthlyRevenue: profitRes.data.total, // ose ndaje në muaj në backend nëse do më saktë
+        profitGrowth: (profitRes.data.sale + profitRes.data.lab) * 0.05, // shembull: 5% growth
+      });
+    } catch (err) {
+      console.error("Gabim gjatë marrjes së statistikave:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const statCards = [
     {
       title: "Total Patients",
-      value: "", 
+      value: stats.patients,
       icon: <FaUserInjured />,
       color: "#00bcd4",
     },
     {
       title: "Appointments Today",
-      value: "",
+      value: stats.appointmentsToday,
       icon: <FaCalendarCheck />,
       color: "#4caf50",
     },
     {
       title: "Monthly Revenue",
-      value: "",
+      value: `€${stats.monthlyRevenue.toFixed(2)}`,
       icon: <FaEuroSign />,
       color: "#ff9800",
     },
     {
       title: "Profit Growth",
-      value: "",
+      value: `+€${stats.profitGrowth.toFixed(2)}`,
       icon: <FaChartLine />,
       color: "#e91e63",
     },
@@ -40,9 +75,9 @@ const DashboardHome = () => {
 
   return (
     <DashboardLayout>
-      <h1 style={{ marginBottom: "20px" }}>Dashboard</h1>
-      <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-        {stats.map((item) => (
+      <h1 className="text-2xl font-bold mb-4 text-white">Dashboard</h1>
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {statCards.map((item) => (
           <StatCard key={item.title} {...item} />
         ))}
       </div>

@@ -1,54 +1,32 @@
-import React, { useState, useEffect } from "react";
-import DashboardLayout from "../layout/DashboardLayout";
+// src/pages/Appointments.jsx
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import AddAppointmentModal from "../components/AddAppointmentModal";
 import EditAppointmentModal from "../components/EditAppointmentModal";
-import "../styles/dashboard.css";
 
-const AppointmentsPage = () => {
+const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editAppt, setEditAppt] = useState(null);
-  const token = localStorage.getItem("token");
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const fetchAppointments = async () => {
-    const res = await fetch("http://localhost:3000/api/appointment", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    setAppointments(data);
-  };
-
-  const handleAdd = async (data) => {
-    const res = await fetch("http://localhost:3000/api/appointment", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) fetchAppointments();
-  };
-
-  const handleUpdate = async (data) => {
-    const res = await fetch(`http://localhost:3000/api/appointment/${editAppt._id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) fetchAppointments();
+    try {
+      const res = await axios.get("/api/appointments");
+      setAppointments(res.data);
+    } catch (error) {
+      console.error("Error fetching appointments:", error);
+    }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this appointment?")) return;
-    const res = await fetch(`http://localhost:3000/api/appointment/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) fetchAppointments();
+    if (!window.confirm("A je i sigurt që do ta fshish?")) return;
+    try {
+      await axios.delete(`/api/appointments/${id}`);
+      fetchAppointments();
+    } catch (error) {
+      console.error("Error deleting appointment:", error);
+    }
   };
 
   useEffect(() => {
@@ -56,60 +34,75 @@ const AppointmentsPage = () => {
   }, []);
 
   return (
-    <DashboardLayout>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h2>Appointments</h2>
-        <button className="add-button" onClick={() => setShowAddModal(true)}>+ Add Appointment</button>
+    <div className="p-6 text-white">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Takimet</h1>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Shto takim
+        </button>
       </div>
 
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Patient</th>
-            <th>Doctor</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Lab</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {appointments.map((a) => (
-            <tr key={a._id}>
-              <td>{a.patient_id?.first} {a.patient_id?.last}</td>
-              <td>{a.doctor_id?.first} {a.doctor_id?.last}</td>
-              <td>{new Date(a.start).toLocaleString()}</td>
-              <td>{new Date(a.end).toLocaleString()}</td>
-              <td>{a.lab?.type || "—"}</td>
-              <td>
-                <button className="add-button" onClick={() => setEditAppt(a)} style={{ marginRight: 8 }}>
-                  Edit
-                </button>
-                <button className="add-button" onClick={() => handleDelete(a._id)} style={{ backgroundColor: "#e53935", color: "#fff" }}>
-                  Delete
-                </button>
-              </td>
+      <div className="overflow-x-auto bg-[#1e293b] rounded shadow">
+        <table className="min-w-full table-auto">
+          <thead>
+            <tr className="bg-[#334155] text-left">
+              <th className="p-3">Mjeku</th>
+              <th className="p-3">Pacienti</th>
+              <th className="p-3">Fillon</th>
+              <th className="p-3">Mbaron</th>
+              <th className="p-3">Laboratori</th>
+              <th className="p-3">Veprime</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {appointments.map((appt) => (
+              <tr key={appt._id} className="border-b border-gray-700">
+                <td className="p-3">{appt.doctor.first} {appt.doctor.last}</td>
+                <td className="p-3">{appt.patient.first} {appt.patient.last}</td>
+                <td className="p-3">{new Date(appt.start).toLocaleString()}</td>
+                <td className="p-3">{new Date(appt.end).toLocaleString()}</td>
+                <td className="p-3">{appt.lab?.type || "—"}</td>
+                <td className="p-3 flex gap-2">
+                  <button
+                    onClick={() => {
+                      setSelectedAppointment(appt);
+                      setShowEditModal(true);
+                    }}
+                    className="bg-yellow-500 px-3 py-1 rounded hover:bg-yellow-600"
+                  >
+                    Edito
+                  </button>
+                  <button
+                    onClick={() => handleDelete(appt._id)}
+                    className="bg-red-600 px-3 py-1 rounded hover:bg-red-700"
+                  >
+                    Fshi
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {showAddModal && (
         <AddAppointmentModal
           onClose={() => setShowAddModal(false)}
-          onSubmit={handleAdd}
+          onRefresh={fetchAppointments}
         />
       )}
-
-      {editAppt && (
+      {showEditModal && selectedAppointment && (
         <EditAppointmentModal
-          appointment={editAppt}
-          onClose={() => setEditAppt(null)}
-          onSubmit={handleUpdate}
+          appointment={selectedAppointment}
+          onClose={() => setShowEditModal(false)}
+          onRefresh={fetchAppointments}
         />
       )}
-    </DashboardLayout>
+    </div>
   );
 };
 
-export default AppointmentsPage;
+export default Appointments;

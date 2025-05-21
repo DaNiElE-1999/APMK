@@ -1,53 +1,32 @@
-import React, { useState, useEffect } from "react";
-import DashboardLayout from "../layout/DashboardLayout";
+// src/pages/Patients.jsx
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import AddPatientModal from "../components/AddPatientModal";
 import EditPatientModal from "../components/EditPatientModal";
-import "../styles/dashboard.css";
 
-const PatientsPage = () => {
+const Patients = () => {
   const [patients, setPatients] = useState([]);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editPatient, setEditPatient] = useState(null);
-
-  const token = localStorage.getItem("token");
+  const [selected, setSelected] = useState(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   const fetchPatients = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/patient", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setPatients(data);
+      const res = await axios.get("/api/patient");
+      setPatients(res.data);
     } catch (err) {
-      alert("Failed to fetch patients");
+      console.error("Gabim në marrjen e pacientëve", err);
     }
   };
 
-  const handleAddPatient = async (data) => {
-    const res = await fetch("http://localhost:3000/api/patient", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) fetchPatients();
-  };
-
-  const handleUpdatePatient = async (data) => {
-    const res = await fetch(`http://localhost:3000/api/patient/${editPatient._id}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) fetchPatients();
-  };
-
-  const handleDeletePatient = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this patient?")) return;
-    const res = await fetch(`http://localhost:3000/api/patient/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) fetchPatients();
+  const handleDelete = async (id) => {
+    if (!window.confirm("A je i sigurt që do e fshish këtë pacient?")) return;
+    try {
+      await axios.delete(`/api/patient/${id}`);
+      fetchPatients();
+    } catch (err) {
+      console.error("Gabim në fshirje", err);
+    }
   };
 
   useEffect(() => {
@@ -55,56 +34,61 @@ const PatientsPage = () => {
   }, []);
 
   return (
-    <DashboardLayout>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h2>Patients</h2>
-        <button className="add-button" onClick={() => setShowAddModal(true)}>+ Add Patient</button>
+    <div className="p-6 text-white">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Pacientët</h1>
+        <button onClick={() => setShowAdd(true)} className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">
+          Shto Pacient
+        </button>
       </div>
 
-      <table className="table">
-        <thead>
-          <tr>
-            <th>First</th>
-            <th>Last</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {patients.map((p) => (
-            <tr key={p._id}>
-              <td>{p.first}</td>
-              <td>{p.last}</td>
-              <td>{p.email}</td>
-              <td>{p.phone || "—"}</td>
-              <td>
-                <button onClick={() => setEditPatient(p)} className="add-button" style={{ marginRight: 8 }}>Edit</button>
-                <button onClick={() => handleDeletePatient(p._id)} className="add-button" style={{ backgroundColor: "#e53935", color: "#fff" }}>
-                  Delete
-                </button>
-              </td>
+      <div className="overflow-x-auto bg-[#1e293b] rounded shadow">
+        <table className="min-w-full">
+          <thead className="bg-[#334155]">
+            <tr>
+              <th className="p-3 text-left">Emri</th>
+              <th className="p-3 text-left">Email</th>
+              <th className="p-3 text-left">Tel</th>
+              <th className="p-3 text-left">Mosha</th>
+              <th className="p-3 text-left">Veprime</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {patients.map((p) => (
+              <tr key={p._id} className="border-b border-gray-700">
+                <td className="p-3">{p.first} {p.last}</td>
+                <td className="p-3">{p.email}</td>
+                <td className="p-3">{p.phone || "—"}</td>
+                <td className="p-3">{p.age}</td>
+                <td className="p-3 flex gap-2">
+                  <button
+                    onClick={() => {
+                      setSelected(p);
+                      setShowEdit(true);
+                    }}
+                    className="bg-yellow-500 px-3 py-1 rounded hover:bg-yellow-600"
+                  >
+                    Edito
+                  </button>
+                  <button
+                    onClick={() => handleDelete(p._id)}
+                    className="bg-red-600 px-3 py-1 rounded hover:bg-red-700"
+                  >
+                    Fshi
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-      {showAddModal && (
-        <AddPatientModal
-          onClose={() => setShowAddModal(false)}
-          onSubmit={handleAddPatient}
-        />
+      {showAdd && <AddPatientModal onClose={() => setShowAdd(false)} onRefresh={fetchPatients} />}
+      {showEdit && selected && (
+        <EditPatientModal patient={selected} onClose={() => setShowEdit(false)} onRefresh={fetchPatients} />
       )}
-
-      {editPatient && (
-        <EditPatientModal
-          patient={editPatient}
-          onClose={() => setEditPatient(null)}
-          onSubmit={handleUpdatePatient}
-        />
-      )}
-    </DashboardLayout>
+    </div>
   );
 };
 
-export default PatientsPage;
+export default Patients;

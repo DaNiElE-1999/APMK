@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
+// src/components/appointments/AddAppointmentModal.jsx
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-const AddAppointmentModal = ({ onClose, onSubmit }) => {
+const AddAppointmentModal = ({ onClose, onRefresh }) => {
   const [form, setForm] = useState({
     start: "",
     end: "",
@@ -13,93 +15,110 @@ const AddAppointmentModal = ({ onClose, onSubmit }) => {
   const [patients, setPatients] = useState([]);
   const [labs, setLabs] = useState([]);
 
-  const token = localStorage.getItem("token");
-
   useEffect(() => {
-    const fetchOptions = async () => {
-      const d = await fetch("http://localhost:3000/api/doctor", { headers: { Authorization: `Bearer ${token}` } });
-      const p = await fetch("http://localhost:3000/api/patient", { headers: { Authorization: `Bearer ${token}` } });
-      const l = await fetch("http://localhost:3000/api/lab", { headers: { Authorization: `Bearer ${token}` } });
+    axios.get("/api/doctor").then((res) => setDoctors(res.data));
+    axios.get("/api/patient").then((res) => setPatients(res.data));
+    axios.get("/api/lab").then((res) => setLabs(res.data));
+  }, []);
 
-      setDoctors(await d.json());
-      setPatients(await p.json());
-      setLabs(await l.json());
-    };
-
-    fetchOptions();
-  }, [token]);
-
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.start || !form.end || !form.doctor_id || !form.patient_id) {
-      alert("Please fill all required fields");
-      return;
+    try {
+      await axios.put("/api/appointments", form);
+      onRefresh();
+      onClose();
+    } catch (error) {
+      console.error("Error creating appointment:", error);
     }
-    await onSubmit(form);
-    onClose();
   };
 
   return (
-    <div style={overlayStyle}>
-      <form onSubmit={handleSubmit} style={formStyle}>
-        <h2 style={{ color: "#00bcd4" }}>Add Appointment</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-[#1e293b] p-6 rounded w-full max-w-md space-y-4 text-white"
+      >
+        <h2 className="text-xl font-bold mb-4">Shto Takim</h2>
 
-        <input type="datetime-local" name="start" value={form.start} onChange={handleChange} required style={inputStyle} />
-        <input type="datetime-local" name="end" value={form.end} onChange={handleChange} required style={inputStyle} />
+        <input
+          type="datetime-local"
+          name="start"
+          value={form.start}
+          onChange={handleChange}
+          className="w-full p-2 bg-[#334155] rounded"
+          required
+        />
+        <input
+          type="datetime-local"
+          name="end"
+          value={form.end}
+          onChange={handleChange}
+          className="w-full p-2 bg-[#334155] rounded"
+          required
+        />
 
-        <select name="doctor_id" value={form.doctor_id} onChange={handleChange} required style={inputStyle}>
-          <option value="">Select Doctor</option>
+        <select
+          name="doctor_id"
+          value={form.doctor_id}
+          onChange={handleChange}
+          className="w-full p-2 bg-[#334155] rounded"
+          required
+        >
+          <option value="">Zgjidh mjekun</option>
           {doctors.map((d) => (
-            <option key={d._id} value={d._id}>{d.first} {d.last}</option>
+            <option key={d._id} value={d._id}>
+              {d.first} {d.last}
+            </option>
           ))}
         </select>
 
-        <select name="patient_id" value={form.patient_id} onChange={handleChange} required style={inputStyle}>
-          <option value="">Select Patient</option>
+        <select
+          name="patient_id"
+          value={form.patient_id}
+          onChange={handleChange}
+          className="w-full p-2 bg-[#334155] rounded"
+          required
+        >
+          <option value="">Zgjidh pacientin</option>
           {patients.map((p) => (
-            <option key={p._id} value={p._id}>{p.first} {p.last}</option>
+            <option key={p._id} value={p._id}>
+              {p.first} {p.last}
+            </option>
           ))}
         </select>
 
-        <select name="lab" value={form.lab} onChange={handleChange} style={inputStyle}>
-          <option value="">Select Lab (optional)</option>
+        <select
+          name="lab"
+          value={form.lab}
+          onChange={handleChange}
+          className="w-full p-2 bg-[#334155] rounded"
+        >
+          <option value="">Pa laborator</option>
           {labs.map((l) => (
-            <option key={l._id} value={l._id}>{l.type}</option>
+            <option key={l._id} value={l._id}>
+              {l.type}
+            </option>
           ))}
         </select>
 
-        <div style={buttonWrapperStyle}>
-          <button type="button" onClick={onClose} className="add-button" style={{ backgroundColor: "#607d8b" }}>
-            Cancel
+        <div className="flex justify-end gap-4 mt-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-600 rounded"
+          >
+            Anulo
           </button>
-          <button type="submit" className="add-button">Add</button>
+          <button type="submit" className="px-4 py-2 bg-green-600 rounded">
+            Ruaj
+          </button>
         </div>
       </form>
     </div>
   );
-};
-
-const overlayStyle = {
-  position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-  backgroundColor: "rgba(0, 0, 0, 0.5)", display: "flex",
-  alignItems: "center", justifyContent: "center", zIndex: 999,
-};
-
-const formStyle = {
-  backgroundColor: "#1b2a41", padding: 30, borderRadius: 10, width: "400px",
-};
-
-const inputStyle = {
-  width: "100%", padding: "10px", marginBottom: "10px",
-  borderRadius: "6px", border: "none", backgroundColor: "#32455a", color: "#fff",
-};
-
-const buttonWrapperStyle = {
-  marginTop: 20, display: "flex", justifyContent: "flex-end", gap: 10,
 };
 
 export default AddAppointmentModal;

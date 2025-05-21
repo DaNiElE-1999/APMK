@@ -1,58 +1,32 @@
-import React, { useState, useEffect } from "react";
-import DashboardLayout from "../layout/DashboardLayout";
+// src/pages/Medicines.jsx
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import AddMedicineModal from "../components/AddMedicineModal";
 import EditMedicineModal from "../components/EditMedicineModal";
-import "../styles/dashboard.css";
 
-const MedicinesPage = () => {
+const Medicines = () => {
   const [medicines, setMedicines] = useState([]);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editMedicine, setEditMedicine] = useState(null);
-  const token = localStorage.getItem("token");
+  const [selected, setSelected] = useState(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   const fetchMedicines = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/medicine", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setMedicines(data);
+      const res = await axios.get("/api/medicine");
+      setMedicines(res.data);
     } catch (err) {
-      alert("Failed to fetch medicines");
+      console.error("Gabim gjatë marrjes së medikamenteve", err);
     }
   };
 
-  const handleAddMedicine = async (data) => {
-    const res = await fetch("http://localhost:3000/api/medicine", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) fetchMedicines();
-  };
-
-  const handleUpdateMedicine = async (data) => {
-    const res = await fetch(`http://localhost:3000/api/medicine/${editMedicine._id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    });
-    if (res.ok) fetchMedicines();
-  };
-
-  const handleDeleteMedicine = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this medicine?")) return;
-    const res = await fetch(`http://localhost:3000/api/medicine/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) fetchMedicines();
+  const handleDelete = async (id) => {
+    if (!window.confirm("A je i sigurt që do e fshish këtë medikament?")) return;
+    try {
+      await axios.delete(`/api/medicine/${id}`);
+      fetchMedicines();
+    } catch (err) {
+      console.error("Gabim gjatë fshirjes", err);
+    }
   };
 
   useEffect(() => {
@@ -60,52 +34,57 @@ const MedicinesPage = () => {
   }, []);
 
   return (
-    <DashboardLayout>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h2>Medicines</h2>
-        <button className="add-button" onClick={() => setShowAddModal(true)}>+ Add Medicine</button>
+    <div className="p-6 text-white">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Barnat</h1>
+        <button onClick={() => setShowAdd(true)} className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">
+          Shto Bar
+        </button>
       </div>
 
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Cost (€)</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {medicines.map((m) => (
-            <tr key={m._id}>
-              <td>{m.name}</td>
-              <td>{m.cost}</td>
-              <td>
-                <button onClick={() => setEditMedicine(m)} className="add-button" style={{ marginRight: 8 }}>Edit</button>
-                <button onClick={() => handleDeleteMedicine(m._id)} className="add-button" style={{ backgroundColor: "#e53935", color: "#fff" }}>
-                  Delete
-                </button>
-              </td>
+      <div className="overflow-x-auto bg-[#1e293b] rounded shadow">
+        <table className="min-w-full">
+          <thead className="bg-[#334155]">
+            <tr>
+              <th className="p-3 text-left">Emri</th>
+              <th className="p-3 text-left">Çmimi (€)</th>
+              <th className="p-3 text-left">Veprime</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {medicines.map((med) => (
+              <tr key={med._id} className="border-b border-gray-700">
+                <td className="p-3">{med.name}</td>
+                <td className="p-3">{med.cost.toFixed(2)}</td>
+                <td className="p-3 flex gap-2">
+                  <button
+                    onClick={() => {
+                      setSelected(med);
+                      setShowEdit(true);
+                    }}
+                    className="bg-yellow-500 px-3 py-1 rounded hover:bg-yellow-600"
+                  >
+                    Edito
+                  </button>
+                  <button
+                    onClick={() => handleDelete(med._id)}
+                    className="bg-red-600 px-3 py-1 rounded hover:bg-red-700"
+                  >
+                    Fshi
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-      {showAddModal && (
-        <AddMedicineModal
-          onClose={() => setShowAddModal(false)}
-          onSubmit={handleAddMedicine}
-        />
+      {showAdd && <AddMedicineModal onClose={() => setShowAdd(false)} onRefresh={fetchMedicines} />}
+      {showEdit && selected && (
+        <EditMedicineModal medicine={selected} onClose={() => setShowEdit(false)} onRefresh={fetchMedicines} />
       )}
-
-      {editMedicine && (
-        <EditMedicineModal
-          medicine={editMedicine}
-          onClose={() => setEditMedicine(null)}
-          onSubmit={handleUpdateMedicine}
-        />
-      )}
-    </DashboardLayout>
+    </div>
   );
 };
 
-export default MedicinesPage;
+export default Medicines;

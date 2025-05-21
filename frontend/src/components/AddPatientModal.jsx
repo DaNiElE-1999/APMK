@@ -1,11 +1,14 @@
+// src/components/patients/AddPatientModal.jsx
 import React, { useState } from "react";
+import axios from "axios";
 
-const AddPatientModal = ({ onClose, onSubmit }) => {
+const AddPatientModal = ({ onClose, onRefresh }) => {
   const [form, setForm] = useState({
     first: "",
     last: "",
     email: "",
     phone: "",
+    age: "",
   });
 
   const handleChange = (e) =>
@@ -13,95 +16,82 @@ const AddPatientModal = ({ onClose, onSubmit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!form.first || !form.last || !form.email) {
-      alert("First name, last name and email are required.");
-      return;
+    try {
+      await axios.put("/api/patient", {
+        ...form,
+        age: parseInt(form.age),
+      });
+      onRefresh();
+      onClose();
+    } catch (err) {
+      console.error("Gabim në shtim", err);
     }
-
-    await onSubmit(form);
-    onClose();
   };
 
   return (
-    <div style={overlayStyle}>
-      <form onSubmit={handleSubmit} style={formStyle}>
-        <h2 style={{ color: "#00bcd4" }}>Add Patient</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-[#1e293b] p-6 rounded w-full max-w-md text-white space-y-4"
+      >
+        <h2 className="text-xl font-bold mb-4">Shto Pacient</h2>
 
         <input
+          type="text"
           name="first"
-          placeholder="First Name"
           value={form.first}
           onChange={handleChange}
+          placeholder="Emri"
           required
-          style={inputStyle}
+          className="w-full p-2 bg-[#334155] rounded"
         />
         <input
+          type="text"
           name="last"
-          placeholder="Last Name"
           value={form.last}
           onChange={handleChange}
+          placeholder="Mbiemri"
           required
-          style={inputStyle}
+          className="w-full p-2 bg-[#334155] rounded"
         />
         <input
-          name="email"
           type="email"
-          placeholder="Email"
+          name="email"
           value={form.email}
           onChange={handleChange}
+          placeholder="Email"
           required
-          style={inputStyle}
+          className="w-full p-2 bg-[#334155] rounded"
         />
         <input
+          type="text"
           name="phone"
-          placeholder="Phone"
           value={form.phone}
           onChange={handleChange}
-          style={inputStyle}
+          placeholder="Telefoni (opsional)"
+          className="w-full p-2 bg-[#334155] rounded"
+        />
+        <input
+          type="number"
+          name="age"
+          value={form.age}
+          onChange={handleChange}
+          placeholder="Mosha"
+          required
+          className="w-full p-2 bg-[#334155] rounded"
         />
 
-        <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end", gap: 10 }}>
-          <button type="button" onClick={onClose} className="add-button" style={{ backgroundColor: "#607d8b" }}>
-            Cancel
+        <div className="flex justify-end gap-4">
+          <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-600 rounded">
+            Anulo
           </button>
-          <button type="submit" className="add-button">
-            Add
+          <button type="submit" className="px-4 py-2 bg-green-600 rounded">
+            Shto
           </button>
         </div>
       </form>
     </div>
   );
-};
-
-const overlayStyle = {
-  position: "fixed",
-  top: 0,
-  left: 0,
-  width: "100%",
-  height: "100%",
-  backgroundColor: "rgba(0, 0, 0, 0.5)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 999,
-};
-
-const formStyle = {
-  backgroundColor: "#1b2a41",
-  padding: 30,
-  borderRadius: 10,
-  width: "400px",
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "10px",
-  marginBottom: "10px",
-  borderRadius: "6px",
-  border: "none",
-  backgroundColor: "#32455a",
-  color: "#fff",
 };
 
 export default AddPatientModal;

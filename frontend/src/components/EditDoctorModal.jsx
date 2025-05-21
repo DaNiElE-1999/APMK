@@ -1,78 +1,79 @@
-import React, { useState, useEffect } from "react";
+// src/components/doctors/EditDoctorModal.jsx
+import React, { useState } from "react";
+import axios from "axios";
 
-const EditDoctorModal = ({ doctor, onClose, onSubmit }) => {
-  const [form, setForm] = useState({
-    first: "",
-    last: "",
-    email: "",
-    speciality: "",
-    phone: "",
-  });
-
-  useEffect(() => {
-    if (doctor) {
-      setForm({
-        first: doctor.first || "",
-        last: doctor.last || "",
-        email: doctor.email || "",
-        speciality: doctor.speciality || "",
-        phone: doctor.phone || "",
-      });
-    }
-  }, [doctor]);
+const EditDoctorModal = ({ doctor, onClose, onRefresh }) => {
+  const [form, setForm] = useState({ ...doctor });
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.first || !form.last || !form.email || !form.speciality) {
-      alert("Please fill all required fields");
-      return;
+    try {
+      await axios.post(`/api/doctor/${doctor._id}`, form);
+      onRefresh();
+      onClose();
+    } catch (error) {
+      console.error("Error updating doctor:", error);
     }
-    await onSubmit(form);
-    onClose();
   };
 
   return (
-    <div style={overlayStyle}>
-      <form onSubmit={handleSubmit} style={formStyle}>
-        <h2 style={{ color: "#00bcd4" }}>Edit Doctor</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-[#1e293b] p-6 rounded w-full max-w-md space-y-4 text-white"
+      >
+        <h2 className="text-xl font-bold mb-4">Edito Mjek</h2>
 
-        <input name="first" placeholder="First Name" value={form.first} onChange={handleChange} required style={inputStyle} />
-        <input name="last" placeholder="Last Name" value={form.last} onChange={handleChange} required style={inputStyle} />
-        <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} required style={inputStyle} />
-        <input name="speciality" placeholder="Speciality" value={form.speciality} onChange={handleChange} required style={inputStyle} />
-        <input name="phone" placeholder="Phone (optional)" value={form.phone} onChange={handleChange} style={inputStyle} />
+        <input
+          type="text"
+          name="first"
+          value={form.first}
+          onChange={handleChange}
+          className="w-full p-2 bg-[#334155] rounded"
+        />
+        <input
+          type="text"
+          name="last"
+          value={form.last}
+          onChange={handleChange}
+          className="w-full p-2 bg-[#334155] rounded"
+        />
+        <input
+          type="email"
+          name="email"
+          value={form.email}
+          onChange={handleChange}
+          className="w-full p-2 bg-[#334155] rounded"
+        />
+        <input
+          type="text"
+          name="speciality"
+          value={form.speciality}
+          onChange={handleChange}
+          className="w-full p-2 bg-[#334155] rounded"
+        />
+        <input
+          type="text"
+          name="phone"
+          value={form.phone}
+          onChange={handleChange}
+          className="w-full p-2 bg-[#334155] rounded"
+        />
 
-        <div style={buttonWrapperStyle}>
-          <button type="button" onClick={onClose} className="add-button" style={{ backgroundColor: "#607d8b" }}>
-            Cancel
+        <div className="flex justify-end gap-4">
+          <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-600 rounded">
+            Anulo
           </button>
-          <button type="submit" className="add-button">Save</button>
+          <button type="submit" className="px-4 py-2 bg-yellow-600 rounded">
+            Përditëso
+          </button>
         </div>
       </form>
     </div>
   );
-};
-
-const overlayStyle = {
-  position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-  backgroundColor: "rgba(0, 0, 0, 0.5)", display: "flex",
-  alignItems: "center", justifyContent: "center", zIndex: 999,
-};
-
-const formStyle = {
-  backgroundColor: "#1b2a41", padding: 30, borderRadius: 10, width: "400px",
-};
-
-const inputStyle = {
-  width: "100%", padding: "10px", marginBottom: "10px",
-  borderRadius: "6px", border: "none", backgroundColor: "#32455a", color: "#fff",
-};
-
-const buttonWrapperStyle = {
-  marginTop: 20, display: "flex", justifyContent: "flex-end", gap: 10,
 };
 
 export default EditDoctorModal;
