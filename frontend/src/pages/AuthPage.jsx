@@ -5,10 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import "../styles/auth.css";
 
 const AuthPage = () => {
-  const [mode, setMode] = useState("login");
-  const navigate = useNavigate();
-  const { login } = useAuth();
-
+  const [mode, setMode] = useState("login"); // ose 'register'
   const [form, setForm] = useState({
     username: "",
     password: "",
@@ -16,6 +13,9 @@ const AuthPage = () => {
     lastname: "",
     email: "",
   });
+
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -25,11 +25,16 @@ const AuthPage = () => {
     e.preventDefault();
 
     const endpoint = mode === "login" ? "/api/users/login" : "/api/users/register";
-
     const body =
       mode === "login"
         ? { username: form.username, password: form.password }
-        : form;
+        : {
+            username: form.username,
+            password: form.password,
+            firstname: form.firstname,
+            lastname: form.lastname,
+            email: form.email,
+          };
 
     try {
       const res = await fetch(`http://localhost:3000${endpoint}`, {
@@ -41,7 +46,7 @@ const AuthPage = () => {
       const data = await res.json();
 
       if (res.ok && data.token) {
-        login(data); // dërgojmë objektin e plotë të përdoruesit
+        login(data); // ruaj userin me token
         navigate("/dashboard");
       } else {
         alert(data.message || "Gabim gjatë autentikimit.");
@@ -58,19 +63,56 @@ const AuthPage = () => {
         <form onSubmit={handleSubmit}>
           {mode === "register" && (
             <>
-              <input name="firstname" placeholder="First Name" onChange={handleChange} required />
-              <input name="lastname" placeholder="Last Name" onChange={handleChange} required />
-              <input name="email" type="email" placeholder="Email" onChange={handleChange} required />
+              <input
+                name="firstname"
+                placeholder="First Name"
+                onChange={handleChange}
+                value={form.firstname}
+                required
+              />
+              <input
+                name="lastname"
+                placeholder="Last Name"
+                onChange={handleChange}
+                value={form.lastname}
+                required
+              />
+              <input
+                name="email"
+                type="email"
+                placeholder="Email"
+                onChange={handleChange}
+                value={form.email}
+                required
+              />
             </>
           )}
-          <input name="username" placeholder="Username" onChange={handleChange} required />
-          <input name="password" type="password" placeholder="Password" onChange={handleChange} required />
-          <button type="submit">{mode === "login" ? "Login" : "Register"}</button>
+          <input
+            name="username"
+            placeholder="Username"
+            onChange={handleChange}
+            value={form.username}
+            required
+          />
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            onChange={handleChange}
+            value={form.password}
+            required
+          />
+          <button type="submit">
+            {mode === "login" ? "Login" : "Register"}
+          </button>
         </form>
 
         <div className="auth-toggle">
           {mode === "login" ? "Don't have an account?" : "Already registered?"}{" "}
-          <button onClick={() => setMode(mode === "login" ? "register" : "login")}>
+          <button
+            type="button"
+            onClick={() => setMode(mode === "login" ? "register" : "login")}
+          >
             {mode === "login" ? "Register" : "Login"}
           </button>
         </div>
