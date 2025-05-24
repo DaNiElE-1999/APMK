@@ -1,4 +1,3 @@
-// src/pages/AuthPage.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -24,7 +23,7 @@ const AuthPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const endpoint = mode === "login" ? "/api/users/login" : "/api/users/register";
+    const endpoint = mode === "login" ? "/api/login" : "/api/register";
     const body =
       mode === "login"
         ? { username: form.username, password: form.password }
@@ -38,7 +37,7 @@ const AuthPage = () => {
 
     try {
       const res = await fetch(`http://localhost:3000${endpoint}`, {
-        method: "POST",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
