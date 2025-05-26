@@ -1,6 +1,6 @@
 // src/pages/Appointments.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import AddAppointmentModal from "../components/AddAppointmentModal";
 import EditAppointmentModal from "../components/EditAppointmentModal";
 
@@ -10,22 +10,37 @@ const Appointments = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
+
   const fetchAppointments = async () => {
     try {
-      const res = await axios.get("/api/appointments");
-      setAppointments(res.data);
+      const res = await fetch("/api/appointments", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Gabim gjatë marrjes së të dhënave");
+      const data = await res.json();
+      setAppointments(data);
     } catch (error) {
-      console.error("Error fetching appointments:", error);
+      console.error("Gabim gjatë marrjes së takimeve:", error);
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("A je i sigurt që do ta fshish?")) return;
     try {
-      await axios.delete(`/api/appointments/${id}`);
+      const res = await fetch(`/api/appointments/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Fshirja dështoi");
       fetchAppointments();
     } catch (error) {
-      console.error("Error deleting appointment:", error);
+      console.error("Gabim gjatë fshirjes së takimit:", error);
     }
   };
 
@@ -34,7 +49,14 @@ const Appointments = () => {
   }, []);
 
   return (
-    <div className="p-6 text-white">
+    <div className="p-6 text-white relative">
+      <button
+        onClick={() => navigate(-1)}
+        className="absolute top-4 right-6 bg-cyan-600 text-white px-3 py-1 rounded hover:bg-cyan-700"
+      >
+        ← Kthehu
+      </button>
+
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Takimet</h1>
         <button
@@ -60,8 +82,8 @@ const Appointments = () => {
           <tbody>
             {appointments.map((appt) => (
               <tr key={appt._id} className="border-b border-gray-700">
-                <td className="p-3">{appt.doctor.first} {appt.doctor.last}</td>
-                <td className="p-3">{appt.patient.first} {appt.patient.last}</td>
+                <td className="p-3">{appt.doctor?.first} {appt.doctor?.last}</td>
+                <td className="p-3">{appt.patient?.first} {appt.patient?.last}</td>
                 <td className="p-3">{new Date(appt.start).toLocaleString()}</td>
                 <td className="p-3">{new Date(appt.end).toLocaleString()}</td>
                 <td className="p-3">{appt.lab?.type || "—"}</td>

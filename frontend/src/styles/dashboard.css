@@ -1,23 +1,35 @@
+/* Global styles */
 body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
   font-family: 'Poppins', sans-serif;
   margin: 0;
-  background-color: #0d1b2a;
-  color: #ffffff;
 }
 
+/* Sidebar */
 .sidebar {
-  width: 250px;
-  background-color: #1e1e2f;
+  width: 240px;
+  background-color: var(--sidebar-color);
   height: 100vh;
-  padding: 1rem;
-  color: white;
   position: fixed;
+  top: 0;
+  left: 0;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  border-right: 1px solid #ccc;
+  z-index: 1000;
 }
 
 .sidebar-title {
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
+  color: var(--text-color);
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 22px;
+  text-decoration: none;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .sidebar-menu {
@@ -26,118 +38,88 @@ body {
 }
 
 .sidebar-menu li {
-  margin: 1rem 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  padding: 15px 30px;
+  color: var(--text-color);
   cursor: pointer;
+  transition: background 0.3s ease;
 }
 
 .sidebar-menu li a {
-  color: white;
   text-decoration: none;
+  color: var(--text-color);
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.sidebar-menu li a:hover,
-.sidebar-menu li.logout:hover {
-  color: #00bfff;
+.sidebar-menu li:hover {
+  background-color: var(--hover-color);
 }
 
+.logout {
+  margin-top: auto;
+  padding: 15px 30px;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.logout:hover {
+  background-color: var(--hover-color);
+}
+
+/* Topbar */
 .topbar {
-  margin-left: 250px;
+  position: fixed;
+  top: 0;
+  left: 240px;
+  right: 0;
   height: 60px;
-  background-color: #1e2d48;
+  background-color: var(--bg-color);
+  color: var(--text-color);
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 20px;
-  justify-content: flex-end;
-  border-bottom: 1px solid #293b59;
-  position: relative;
+  border-bottom: 1px solid #ccc;
+  z-index: 900;
 }
 
-.logout-button {
-  background-color: #e74c3c;
-  color: rgb(218, 3, 3);
-  border: none;
+/* Main content area */
+main {
+  margin-left: 240px;
+  background-color: var(--bg-color);
+  min-height: 100vh;
+  color: var(--text-color);
+  padding-top: 60px;
+  position: relative;
+  z-index: 10;
+  overflow-x: hidden;
+}
+
+/* Ensure content inside Outlet renders correctly */
+main > div {
+  padding: 1rem;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Back button styling */
+.back-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #2563eb;
+  color: white;
   padding: 8px 16px;
   border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s ease;
-}
-
-.logout-button:hover {
-  background-color: #c0392b;
-}
-
-.content {
-  margin-left: 250px;
-  padding: 20px;
-  min-height: calc(100vh - 60px);
-  background-color: #0d1b2a;
-}
-
-.stat-card {
-  background-color: #1b2a41;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  min-width: 220px;
-}
-
-.stat-icon {
-  background-color: #00bcd4;
-  border-radius: 50%;
-  padding: 12px;
-  color: #fff;
-  font-size: 24px;
-}
-
-.table {
-  width: 100%;
-  margin-top: 20px;
-  border-collapse: collapse;
-}
-
-.table th {
-  background-color: #1e2d48;
-  color: #00bcd4;
-  padding: 12px;
-  text-align: left;
+  text-decoration: none;
   font-weight: 500;
-  border-bottom: 1px solid #293b59;
-}
-
-.table td {
-  padding: 10px;
-  border-bottom: 1px solid #293b59;
-  color: #ddd;
-}
-
-.add-button {
-  padding: 10px 16px;
-  background-color: #00bcd4;
-  border: none;
-  border-radius: 6px;
-  color: #1b2a41;
-  font-weight: bold;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.3s ease;
+  z-index: 999;
 }
 
-.add-button:hover {
-  background-color: #00acc1;
-}
-
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+.back-button:hover {
+  background-color: #1d4ed8;
 }

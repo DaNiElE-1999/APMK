@@ -1,6 +1,5 @@
 // src/pages/DashboardHome.jsx
 import React, { useEffect, useState } from "react";
-import axios from "../utils/axios";
 import DashboardLayout from "../layout/DashboardLayout";
 import StatCard from "../components/StatCard";
 import {
@@ -20,22 +19,36 @@ const DashboardHome = () => {
 
   const fetchStats = async () => {
     try {
+      const token = localStorage.getItem("token");
+
       const [patientsRes, appointmentsRes, profitRes] = await Promise.all([
-        axios.get("/api/patient"),
-        axios.get("/api/appointments", {
-          params: {
-            from: new Date().toISOString().slice(0, 10),
-            to: new Date().toISOString().slice(0, 10),
+        fetch("/api/patient", {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        }),
-        axios.get("/api/profits/all"),
+        }).then((res) => res.json()),
+
+        fetch(
+          `/api/appointments?from=${new Date().toISOString().slice(0, 10)}&to=${new Date().toISOString().slice(0, 10)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        ).then((res) => res.json()),
+
+        fetch("/api/profits/all", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).then((res) => res.json()),
       ]);
 
       setStats({
-        patients: patientsRes.data.length,
-        appointmentsToday: appointmentsRes.data.length,
-        monthlyRevenue: profitRes.data.total, // ose ndaje në muaj në backend nëse do më saktë
-        profitGrowth: (profitRes.data.sale + profitRes.data.lab) * 0.05, // shembull: 5% growth
+        patients: patientsRes.length,
+        appointmentsToday: appointmentsRes.length,
+        monthlyRevenue: profitRes.total || 0,
+        profitGrowth: ((profitRes.sale || 0) + (profitRes.lab || 0)) * 0.05,
       });
     } catch (err) {
       console.error("Gabim gjatë marrjes së statistikave:", err);

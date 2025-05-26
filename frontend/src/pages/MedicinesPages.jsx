@@ -1,6 +1,5 @@
-// src/pages/Medicines.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import AddMedicineModal from "../components/AddMedicineModal";
 import EditMedicineModal from "../components/EditMedicineModal";
 
@@ -9,11 +8,19 @@ const Medicines = () => {
   const [selected, setSelected] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
 
   const fetchMedicines = async () => {
     try {
-      const res = await axios.get("/api/medicine");
-      setMedicines(res.data);
+      const res = await fetch("/api/medicine", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Gabim gjatë marrjes së medikamenteve");
+      const data = await res.json();
+      setMedicines(data);
     } catch (err) {
       console.error("Gabim gjatë marrjes së medikamenteve", err);
     }
@@ -22,7 +29,13 @@ const Medicines = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("A je i sigurt që do e fshish këtë medikament?")) return;
     try {
-      await axios.delete(`/api/medicine/${id}`);
+      const res = await fetch(`/api/medicine/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Gabim gjatë fshirjes");
       fetchMedicines();
     } catch (err) {
       console.error("Gabim gjatë fshirjes", err);
@@ -37,9 +50,20 @@ const Medicines = () => {
     <div className="p-6 text-white">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Barnat</h1>
-        <button onClick={() => setShowAdd(true)} className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">
-          Shto Bar
-        </button>
+        <div className="flex gap-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded"
+          >
+            Kthehu mbrapa
+          </button>
+          <button
+            onClick={() => setShowAdd(true)}
+            className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Shto Bar
+          </button>
+        </div>
       </div>
 
       <div className="overflow-x-auto bg-[#1e293b] rounded shadow">
@@ -79,9 +103,18 @@ const Medicines = () => {
         </table>
       </div>
 
-      {showAdd && <AddMedicineModal onClose={() => setShowAdd(false)} onRefresh={fetchMedicines} />}
+      {showAdd && (
+        <AddMedicineModal
+          onClose={() => setShowAdd(false)}
+          onRefresh={fetchMedicines}
+        />
+      )}
       {showEdit && selected && (
-        <EditMedicineModal medicine={selected} onClose={() => setShowEdit(false)} onRefresh={fetchMedicines} />
+        <EditMedicineModal
+          medicine={selected}
+          onClose={() => setShowEdit(false)}
+          onRefresh={fetchMedicines}
+        />
       )}
     </div>
   );

@@ -23,7 +23,9 @@ const Sidebar = () => {
 
   return (
     <div className="sidebar">
-      <h2 className="sidebar-title">Klinika</h2>
+      <Link to="/dashboard" className="sidebar-title">
+        Klinika
+      </Link>
       <ul className="sidebar-menu">
         <li>
           <Link to="/dashboard">
@@ -51,10 +53,16 @@ const Sidebar = () => {
           </Link>
         </li>
         <li>
-          <Link to="/medicines-sold">
+          <Link to="/medicine-sold">
             <FaMoneyBill /> Shitjet
           </Link>
         </li>
+        <li>
+              <Link to="/files">
+            <FaFlask /> Skedarët
+            </Link>
+        </li>
+
         <li>
           <Link to="/patients">
             <FaUserInjured /> Pacientët

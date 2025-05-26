@@ -1,6 +1,5 @@
-// src/pages/Patients.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import AddPatientModal from "../components/AddPatientModal";
 import EditPatientModal from "../components/EditPatientModal";
 
@@ -9,11 +8,19 @@ const Patients = () => {
   const [selected, setSelected] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
 
   const fetchPatients = async () => {
     try {
-      const res = await axios.get("/api/patient");
-      setPatients(res.data);
+      const res = await fetch("/api/patient", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Gabim në marrjen e pacientëve");
+      const data = await res.json();
+      setPatients(data);
     } catch (err) {
       console.error("Gabim në marrjen e pacientëve", err);
     }
@@ -22,7 +29,13 @@ const Patients = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("A je i sigurt që do e fshish këtë pacient?")) return;
     try {
-      await axios.delete(`/api/patient/${id}`);
+      const res = await fetch(`/api/patient/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Gabim në fshirje");
       fetchPatients();
     } catch (err) {
       console.error("Gabim në fshirje", err);
@@ -37,9 +50,20 @@ const Patients = () => {
     <div className="p-6 text-white">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Pacientët</h1>
-        <button onClick={() => setShowAdd(true)} className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">
-          Shto Pacient
-        </button>
+        <div className="flex gap-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded"
+          >
+            Kthehu mbrapa
+          </button>
+          <button
+            onClick={() => setShowAdd(true)}
+            className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Shto Pacient
+          </button>
+        </div>
       </div>
 
       <div className="overflow-x-auto bg-[#1e293b] rounded shadow">
@@ -83,9 +107,15 @@ const Patients = () => {
         </table>
       </div>
 
-      {showAdd && <AddPatientModal onClose={() => setShowAdd(false)} onRefresh={fetchPatients} />}
+      {showAdd && (
+        <AddPatientModal onClose={() => setShowAdd(false)} onRefresh={fetchPatients} />
+      )}
       {showEdit && selected && (
-        <EditPatientModal patient={selected} onClose={() => setShowEdit(false)} onRefresh={fetchPatients} />
+        <EditPatientModal
+          patient={selected}
+          onClose={() => setShowEdit(false)}
+          onRefresh={fetchPatients}
+        />
       )}
     </div>
   );

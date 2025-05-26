@@ -1,6 +1,5 @@
-// src/pages/ProfitDashboard.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const ProfitDashboard = () => {
   const [data, setData] = useState({ sale: 0, lab: 0, total: 0 });
@@ -13,14 +12,21 @@ const ProfitDashboard = () => {
     ageMin: "",
     ageMax: ""
   });
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
 
   const fetchProfits = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("/api/profits/all", {
-        params: filters,
+      const query = new URLSearchParams(filters).toString();
+      const res = await fetch(`/api/profits/all?${query}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      setData(res.data);
+      if (!res.ok) throw new Error("Gabim gjatë marrjes së fitimeve");
+      const result = await res.json();
+      setData(result);
     } catch (err) {
       console.error("Gabim gjatë marrjes së fitimeve", err);
     } finally {
@@ -42,10 +48,21 @@ const ProfitDashboard = () => {
 
   return (
     <div className="p-6 text-white">
-      <h1 className="text-2xl font-bold mb-4">Analiza e Fitimeve</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Analiza e Fitimeve</h1>
+        <button
+          onClick={() => navigate(-1)}
+          className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded"
+        >
+          Kthehu mbrapa
+        </button>
+      </div>
 
       {/* Filter Form */}
-      <form onSubmit={handleFilter} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+      <form
+        onSubmit={handleFilter}
+        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6"
+      >
         <input
           type="date"
           name="from"
@@ -101,7 +118,9 @@ const ProfitDashboard = () => {
           </div>
           <div className="bg-[#1e293b] p-6 rounded shadow">
             <h2 className="text-lg font-semibold">Totali</h2>
-            <p className="text-xl mt-2 font-bold text-green-400">€ {data.total.toFixed(2)}</p>
+            <p className="text-xl mt-2 font-bold text-green-400">
+              € {data.total.toFixed(2)}
+            </p>
           </div>
         </div>
       )}
