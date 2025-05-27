@@ -1,13 +1,9 @@
-/* src/index.css */
-
-/* Reset bazik për të gjitha elementet */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Body i përgjithshëm */
 body {
   font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #0d1b2a;
@@ -15,13 +11,11 @@ body {
   line-height: 1.6;
 }
 
-/* Link stil modern */
 a {
   color: inherit;
   text-decoration: none;
 }
 
-/* Buttons */
 button {
   font-family: inherit;
   padding: 0.6rem 1.2rem;
@@ -41,7 +35,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* Inpute dhe select */
 input, select, textarea {
   padding: 0.5rem;
   border-radius: 5px;
@@ -59,13 +52,11 @@ input:focus, select:focus, textarea:focus {
   outline-offset: 2px;
 }
 
-/* Layout wrapper */
 .app.dark {
   background-color: #1e1e2f;
   min-height: 100vh;
 }
 
-/* Helper classes */
 .text-center {
   text-align: center;
 }

@@ -1,4 +1,3 @@
-// src/components/EditLabModal.jsx
 import React, { useState, useEffect } from "react";
 
 const EditLabModal = ({ lab, onClose, onRefresh }) => {

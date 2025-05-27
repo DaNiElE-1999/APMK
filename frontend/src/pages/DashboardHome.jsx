@@ -1,4 +1,3 @@
-// src/pages/DashboardHome.jsx
 import React, { useEffect, useState } from "react";
 import DashboardLayout from "../layout/DashboardLayout";
 import StatCard from "../components/StatCard";

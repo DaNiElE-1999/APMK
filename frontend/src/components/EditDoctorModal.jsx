@@ -1,32 +1,13 @@
-// src/components/EditDoctorModal.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 const EditDoctorModal = ({ doctor, onClose, onRefresh }) => {
-  const [form, setForm] = useState({
-    first: "",
-    last: "",
-    email: "",
-    speciality: "",
-    phone: "",
-  });
+  const [first, setFirst] = useState(doctor.first || "");
+  const [last, setLast] = useState(doctor.last || "");
+  const [email, setEmail] = useState(doctor.email || "");
+  const [speciality, setSpeciality] = useState(doctor.speciality || "");
+  const [phone, setPhone] = useState(doctor.phone || "");
 
   const token = localStorage.getItem("token");
-
-  useEffect(() => {
-    if (doctor) {
-      setForm({
-        first: doctor.first || "",
-        last: doctor.last || "",
-        email: doctor.email || "",
-        speciality: doctor.speciality || "",
-        phone: doctor.phone || "",
-      });
-    }
-  }, [doctor]);
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,11 +18,10 @@ const EditDoctorModal = ({ doctor, onClose, onRefresh }) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ first, last, email, speciality, phone }),
       });
 
       if (!res.ok) throw new Error("Gabim gjatë përditësimit");
-
       onRefresh();
       onClose();
     } catch (err) {
@@ -50,62 +30,62 @@ const EditDoctorModal = ({ doctor, onClose, onRefresh }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-      <div className="bg-[#1e293b] p-6 rounded shadow-lg w-full max-w-md text-white">
-        <h2 className="text-xl font-bold mb-4">Edito Mjek</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-[#0f172a] p-6 rounded w-full max-w-md shadow-lg">
+        <h2 className="text-xl font-semibold text-white mb-6">Edito Mjekun</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
-            name="first"
-            value={form.first}
-            onChange={handleChange}
+            value={first}
+            onChange={(e) => setFirst(e.target.value)}
+            placeholder="Emri"
             required
-            className="w-full px-3 py-2 rounded bg-gray-700"
+            className="w-full p-2 rounded bg-gray-800 text-white"
           />
           <input
             type="text"
-            name="last"
-            value={form.last}
-            onChange={handleChange}
+            value={last}
+            onChange={(e) => setLast(e.target.value)}
+            placeholder="Mbiemri"
             required
-            className="w-full px-3 py-2 rounded bg-gray-700"
+            className="w-full p-2 rounded bg-gray-800 text-white"
           />
           <input
             type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
             required
-            className="w-full px-3 py-2 rounded bg-gray-700"
+            className="w-full p-2 rounded bg-gray-800 text-white"
           />
           <input
             type="text"
-            name="speciality"
-            value={form.speciality}
-            onChange={handleChange}
+            value={speciality}
+            onChange={(e) => setSpeciality(e.target.value)}
+            placeholder="Specialiteti"
             required
-            className="w-full px-3 py-2 rounded bg-gray-700"
+            className="w-full p-2 rounded bg-gray-800 text-white"
           />
           <input
             type="text"
-            name="phone"
-            value={form.phone}
-            onChange={handleChange}
-            className="w-full px-3 py-2 rounded bg-gray-700"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="Telefoni (opsionale)"
+            className="w-full p-2 rounded bg-gray-800 text-white"
           />
-          <div className="flex justify-end gap-4">
+          <div className="flex justify-end gap-4 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="bg-gray-600 px-4 py-2 rounded hover:bg-gray-700"
+              className="bg-red-600 px-4 py-2 rounded hover:bg-red-700 text-white"
             >
               Anulo
             </button>
             <button
               type="submit"
-              className="bg-green-600 px-4 py-2 rounded hover:bg-green-700"
+              className="bg-green-600 px-4 py-2 rounded hover:bg-green-700 text-white"
             >
-              Ruaj
+              Ruaj Ndryshimet
             </button>
           </div>
         </form>

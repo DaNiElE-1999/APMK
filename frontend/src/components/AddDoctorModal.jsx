@@ -1,7 +1,6 @@
-// src/components/AddDoctorModal.jsx
 import React, { useState } from "react";
 
-const AddDoctorModal = ({ onClose, onRefresh }) => {
+const AddDoctorModal = ({ onClose, onRefresh, existingDoctors }) => {
   const [form, setForm] = useState({
     first: "",
     last: "",
@@ -13,11 +12,22 @@ const AddDoctorModal = ({ onClose, onRefresh }) => {
   const token = localStorage.getItem("token");
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const emailExists = existingDoctors.some(
+      (d) => d.email.toLowerCase().trim() === form.email.toLowerCase().trim()
+    );
+
+    if (emailExists) {
+      alert("Ky email ekziston tashmë për një mjek.");
+      return;
+    }
+
     try {
       const res = await fetch("/api/doctor", {
         method: "PUT",
@@ -28,19 +38,27 @@ const AddDoctorModal = ({ onClose, onRefresh }) => {
         body: JSON.stringify(form),
       });
 
-      if (!res.ok) throw new Error("Gabim gjatë shtimit të mjekut");
+      const data = await res.json();
+      console.log("🔍 STATUS:", res.status);
+      console.log("📦 DATA:", data);
 
+      if (!res.ok) {
+        alert(data.message || "Gabim gjatë shtimit të mjekut.");
+        throw new Error(data.message || "Gabim gjatë shtimit të mjekut");
+      }
+
+      alert("✅ Mjeku u shtua me sukses!");
       onRefresh();
       onClose();
     } catch (err) {
-      console.error("Gabim gjatë krijimit të mjekut:", err);
+      console.error("Gabim gjatë shtimit:", err);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-      <div className="bg-[#1e293b] p-6 rounded shadow-lg w-full max-w-md text-white">
-        <h2 className="text-xl font-bold mb-4">Shto Mjek</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-[#0f172a] p-6 rounded w-full max-w-md shadow-lg">
+        <h2 className="text-xl font-semibold text-white mb-6">Shto Mjek</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
@@ -49,7 +67,7 @@ const AddDoctorModal = ({ onClose, onRefresh }) => {
             onChange={handleChange}
             placeholder="Emri"
             required
-            className="w-full px-3 py-2 rounded bg-gray-700"
+            className="w-full p-2 rounded bg-gray-800 text-white"
           />
           <input
             type="text"
@@ -58,7 +76,7 @@ const AddDoctorModal = ({ onClose, onRefresh }) => {
             onChange={handleChange}
             placeholder="Mbiemri"
             required
-            className="w-full px-3 py-2 rounded bg-gray-700"
+            className="w-full p-2 rounded bg-gray-800 text-white"
           />
           <input
             type="email"
@@ -67,7 +85,7 @@ const AddDoctorModal = ({ onClose, onRefresh }) => {
             onChange={handleChange}
             placeholder="Email"
             required
-            className="w-full px-3 py-2 rounded bg-gray-700"
+            className="w-full p-2 rounded bg-gray-800 text-white"
           />
           <input
             type="text"
@@ -76,27 +94,28 @@ const AddDoctorModal = ({ onClose, onRefresh }) => {
             onChange={handleChange}
             placeholder="Specialiteti"
             required
-            className="w-full px-3 py-2 rounded bg-gray-700"
+            className="w-full p-2 rounded bg-gray-800 text-white"
           />
           <input
             type="text"
             name="phone"
             value={form.phone}
             onChange={handleChange}
-            placeholder="Telefoni (opsional)"
-            className="w-full px-3 py-2 rounded bg-gray-700"
+            placeholder="Telefoni (opsionale)"
+            className="w-full p-2 rounded bg-gray-800 text-white"
           />
-          <div className="flex justify-end gap-4">
+
+          <div className="flex justify-end gap-4 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="bg-gray-600 px-4 py-2 rounded hover:bg-gray-700"
+              className="bg-red-600 px-4 py-2 rounded hover:bg-red-700 text-white"
             >
               Anulo
             </button>
             <button
               type="submit"
-              className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
+              className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 text-white"
             >
               Shto
             </button>

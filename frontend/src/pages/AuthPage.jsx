@@ -45,7 +45,7 @@ const AuthPage = () => {
       const data = await res.json();
 
       if (res.ok && data.token) {
-        login(data); // ruaj userin me token
+        login(data); 
         navigate("/dashboard");
       } else {
         alert(data.message || "Gabim gjatë autentikimit.");

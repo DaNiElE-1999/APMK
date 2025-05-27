@@ -1,4 +1,3 @@
-// src/components/AddLabModal.jsx
 import React, { useState } from "react";
 
 const AddLabModal = ({ onClose, onRefresh }) => {

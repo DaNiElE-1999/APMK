@@ -7,7 +7,6 @@ const DashboardLayout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Rrënjët ku nuk duam të shfaqet butoni Kthehu
   const excludedPaths = ["/dashboard", "/appointments", "/doctors", "/labs", "/medicines", "/medicine-sold", "/patients", "/profit", "/files"];
 
   const showBackButton = !excludedPaths.includes(location.pathname);

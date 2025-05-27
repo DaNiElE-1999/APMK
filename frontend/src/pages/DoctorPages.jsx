@@ -15,11 +15,8 @@ const Doctors = () => {
   const fetchDoctors = async () => {
     try {
       const res = await fetch("/api/doctor", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error("Nuk u morën të dhënat");
       const data = await res.json();
       setDoctors(data);
     } catch (err) {
@@ -30,13 +27,10 @@ const Doctors = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("A je i sigurt që do ta fshish mjekun?")) return;
     try {
-      const res = await fetch(`/api/doctor/${id}`, {
+      await fetch(`/api/doctor/${id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error("Gabim gjatë fshirjes");
       fetchDoctors();
     } catch (err) {
       console.error("Gabim gjatë fshirjes së mjekut:", err);
@@ -49,7 +43,6 @@ const Doctors = () => {
 
   return (
     <div className="p-6 text-white relative">
-      {/* Butoni për t'u kthyer */}
       <button
         onClick={() => navigate(-1)}
         className="absolute top-4 right-6 bg-cyan-600 text-white px-3 py-1 rounded hover:bg-cyan-700"
@@ -74,7 +67,7 @@ const Doctors = () => {
               <th className="p-3">Emri</th>
               <th className="p-3">Email</th>
               <th className="p-3">Specialiteti</th>
-              <th className="p-3">Tel</th>
+              <th className="p-3">Telefoni</th>
               <th className="p-3">Veprime</th>
             </tr>
           </thead>
@@ -85,7 +78,7 @@ const Doctors = () => {
                 <td className="p-3">{doc.email}</td>
                 <td className="p-3">{doc.speciality}</td>
                 <td className="p-3">{doc.phone || "—"}</td>
-                <td className="p-3 flex gap-2">
+                <td className="p-3 flex gap-3">
                   <button
                     onClick={() => {
                       setSelectedDoctor(doc);
@@ -110,10 +103,12 @@ const Doctors = () => {
 
       {showAddModal && (
         <AddDoctorModal
+          existingDoctors={doctors}
           onClose={() => setShowAddModal(false)}
           onRefresh={fetchDoctors}
         />
       )}
+
       {showEditModal && selectedDoctor && (
         <EditDoctorModal
           doctor={selectedDoctor}

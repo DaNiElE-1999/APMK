@@ -1,4 +1,3 @@
-// src/components/RegisterForm.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -33,7 +32,7 @@ const RegisterForm = () => {
       const data = await res.json();
 
       if (res.ok && data.token) {
-        login(data); // ruan gjithë objektin user + token
+        login(data); 
         navigate("/dashboard");
       } else {
         setError(data.message || "Regjistrimi dështoi");

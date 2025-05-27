@@ -1,4 +1,3 @@
-// src/pages/Appointments.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AddAppointmentModal from "../components/AddAppointmentModal";
@@ -16,11 +15,8 @@ const Appointments = () => {
   const fetchAppointments = async () => {
     try {
       const res = await fetch("/api/appointments", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error("Gabim gjatë marrjes së të dhënave");
       const data = await res.json();
       setAppointments(data);
     } catch (error) {
@@ -31,13 +27,10 @@ const Appointments = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("A je i sigurt që do ta fshish?")) return;
     try {
-      const res = await fetch(`/api/appointments/${id}`, {
+      await fetch(`/api/appointments/${id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error("Fshirja dështoi");
       fetchAppointments();
     } catch (error) {
       console.error("Gabim gjatë fshirjes së takimit:", error);
@@ -73,8 +66,7 @@ const Appointments = () => {
             <tr className="bg-[#334155] text-left">
               <th className="p-3">Mjeku</th>
               <th className="p-3">Pacienti</th>
-              <th className="p-3">Fillon</th>
-              <th className="p-3">Mbaron</th>
+              <th className="p-3">Koha</th>
               <th className="p-3">Laboratori</th>
               <th className="p-3">Veprime</th>
             </tr>
@@ -85,7 +77,6 @@ const Appointments = () => {
                 <td className="p-3">{appt.doctor?.first} {appt.doctor?.last}</td>
                 <td className="p-3">{appt.patient?.first} {appt.patient?.last}</td>
                 <td className="p-3">{new Date(appt.start).toLocaleString()}</td>
-                <td className="p-3">{new Date(appt.end).toLocaleString()}</td>
                 <td className="p-3">{appt.lab?.type || "—"}</td>
                 <td className="p-3 flex gap-2">
                   <button

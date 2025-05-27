@@ -1,14 +1,10 @@
-// src/components/EditAppointmentModal.jsx
 import React, { useEffect, useState } from "react";
 
 const EditAppointmentModal = ({ appointment, onClose, onRefresh }) => {
-  const [form, setForm] = useState({
-    start: "",
-    end: "",
-    doctor_id: "",
-    patient_id: "",
-    lab: "",
-  });
+  const [start, setStart] = useState(appointment.start?.slice(0, 16) || "");
+  const [doctorId, setDoctorId] = useState(appointment.doctor?._id || "");
+  const [patientId, setPatientId] = useState(appointment.patient?._id || "");
+  const [labId, setLabId] = useState(appointment.lab?._id || "");
 
   const [doctors, setDoctors] = useState([]);
   const [patients, setPatients] = useState([]);
@@ -16,40 +12,31 @@ const EditAppointmentModal = ({ appointment, onClose, onRefresh }) => {
 
   const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    if (appointment) {
-      setForm({
-        start: appointment.start?.slice(0, 16) || "",
-        end: appointment.end?.slice(0, 16) || "",
-        doctor_id: appointment.doctor?._id || "",
-        patient_id: appointment.patient?._id || "",
-        lab: appointment.lab?._id || "",
-      });
-    }
-  }, [appointment]);
-
-  const fetchDropdownData = async () => {
+  const fetchDropdowns = async () => {
     try {
       const [doctorRes, patientRes, labRes] = await Promise.all([
-        fetch("/api/doctor", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
-        fetch("/api/patient", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
-        fetch("/api/lab", { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+        fetch("/api/doctor", { headers: { Authorization: `Bearer ${token}` } }),
+        fetch("/api/patient", { headers: { Authorization: `Bearer ${token}` } }),
+        fetch("/api/lab", { headers: { Authorization: `Bearer ${token}` } }),
       ]);
-      setDoctors(doctorRes);
-      setPatients(patientRes);
-      setLabs(labRes);
+
+      const [doctorData, patientData, labData] = await Promise.all([
+        doctorRes.json(),
+        patientRes.json(),
+        labRes.json(),
+      ]);
+
+      setDoctors(doctorData);
+      setPatients(patientData);
+      setLabs(labData);
     } catch (err) {
-      console.error("Gabim gjatë ngarkimit të dropdown:", err);
+      console.error("Gabim në marrjen e të dhënave për dropdown:", err);
     }
   };
 
   useEffect(() => {
-    fetchDropdownData();
+    fetchDropdowns();
   }, []);
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,11 +47,14 @@ const EditAppointmentModal = ({ appointment, onClose, onRefresh }) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          start,
+          doctor_id: doctorId,
+          patient_id: patientId,
+          lab_id: labId || null,
+        }),
       });
-
       if (!res.ok) throw new Error("Gabim gjatë përditësimit");
-
       onRefresh();
       onClose();
     } catch (err) {
@@ -73,46 +63,37 @@ const EditAppointmentModal = ({ appointment, onClose, onRefresh }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-      <div className="bg-[#1e293b] p-6 rounded shadow-lg w-full max-w-md text-white">
-        <h2 className="text-xl font-bold mb-4">Edito Takim</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-[#0f172a] p-6 rounded w-full max-w-md shadow-lg">
+        <h2 className="text-xl font-semibold text-white mb-6">Përditëso Takimin</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="datetime-local"
-            name="start"
-            value={form.start}
-            onChange={handleChange}
+            value={start}
+            onChange={(e) => setStart(e.target.value)}
             required
-            className="w-full px-3 py-2 rounded bg-gray-700"
+            className="w-full p-2 rounded bg-gray-800 text-white"
           />
-          <input
-            type="datetime-local"
-            name="end"
-            value={form.end}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 rounded bg-gray-700"
-          />
+
           <select
-            name="doctor_id"
-            value={form.doctor_id}
-            onChange={handleChange}
+            value={doctorId}
+            onChange={(e) => setDoctorId(e.target.value)}
             required
-            className="w-full px-3 py-2 rounded bg-gray-700"
+            className="w-full p-2 rounded bg-gray-800 text-white"
           >
             <option value="">Zgjidh Mjekun</option>
-            {doctors.map((d) => (
-              <option key={d._id} value={d._id}>
-                {d.first} {d.last}
+            {doctors.map((doc) => (
+              <option key={doc._id} value={doc._id}>
+                {doc.first} {doc.last}
               </option>
             ))}
           </select>
+
           <select
-            name="patient_id"
-            value={form.patient_id}
-            onChange={handleChange}
+            value={patientId}
+            onChange={(e) => setPatientId(e.target.value)}
             required
-            className="w-full px-3 py-2 rounded bg-gray-700"
+            className="w-full p-2 rounded bg-gray-800 text-white"
           >
             <option value="">Zgjidh Pacientin</option>
             {patients.map((p) => (
@@ -121,30 +102,31 @@ const EditAppointmentModal = ({ appointment, onClose, onRefresh }) => {
               </option>
             ))}
           </select>
+
           <select
-            name="lab"
-            value={form.lab}
-            onChange={handleChange}
-            className="w-full px-3 py-2 rounded bg-gray-700"
+            value={labId}
+            onChange={(e) => setLabId(e.target.value)}
+            className="w-full p-2 rounded bg-gray-800 text-white"
           >
             <option value="">(Opsionale) Zgjidh Laboratorin</option>
-            {labs.map((l) => (
-              <option key={l._id} value={l._id}>
-                {l.type} - €{l.cost}
+            {labs.map((lab) => (
+              <option key={lab._id} value={lab._id}>
+                {lab.type}
               </option>
             ))}
           </select>
-          <div className="flex justify-end gap-4">
+
+          <div className="flex justify-end gap-4 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="bg-gray-600 px-4 py-2 rounded hover:bg-gray-700"
+              className="bg-red-600 px-4 py-2 rounded hover:bg-red-700 text-white"
             >
               Anulo
             </button>
             <button
               type="submit"
-              className="bg-green-600 px-4 py-2 rounded hover:bg-green-700"
+              className="bg-green-600 px-4 py-2 rounded hover:bg-green-700 text-white"
             >
               Ruaj Ndryshimet
             </button>
