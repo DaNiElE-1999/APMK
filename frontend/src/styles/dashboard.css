@@ -117,3 +117,34 @@ main > div {
 .back-button:hover {
   background-color: #1d4ed8;
 }
+
+.fc .fc-toolbar-title {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.fc .fc-button {
+  background-color: #3b82f6;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  color: white;
+}
+
+.fc .fc-button:hover {
+  background-color: #2563eb;
+}
+
+.fc-event {
+  background-color: #38bdf8 !important;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.875rem;
+}
+
+.fc .fc-daygrid-day-number,
+.fc .fc-timegrid-slot-label {
+  color: #94a3b8;
+}

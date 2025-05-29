@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const ProfitDashboard = () => {
   const [data, setData] = useState({ sale: 0, lab: 0, total: 0 });
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
-    from: "",
-    to: "",
+    from: new Date(),
+    to: new Date(),
     patient_id: "",
     doctor_id: "",
     ageMin: "",
@@ -18,7 +20,11 @@ const ProfitDashboard = () => {
   const fetchProfits = async () => {
     setLoading(true);
     try {
-      const query = new URLSearchParams(filters).toString();
+      const query = new URLSearchParams({
+        ...filters,
+        from: filters.from.toISOString().split("T")[0],
+        to: filters.to.toISOString().split("T")[0],
+      }).toString();
       const res = await fetch(`/api/profits/all?${query}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -38,8 +44,8 @@ const ProfitDashboard = () => {
     fetchProfits();
   }, []);
 
-  const handleChange = (e) =>
-    setFilters({ ...filters, [e.target.name]: e.target.value });
+  const handleChange = (name, value) =>
+    setFilters({ ...filters, [name]: value });
 
   const handleFilter = (e) => {
     e.preventDefault();
@@ -61,29 +67,27 @@ const ProfitDashboard = () => {
       {/* Filter Form */}
       <form
         onSubmit={handleFilter}
-        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
       >
-        <input
-          type="date"
-          name="from"
-          value={filters.from}
-          onChange={handleChange}
-          className="p-2 rounded bg-[#334155]"
-          placeholder="Nga data"
+        <DatePicker
+          selected={filters.from}
+          onChange={(date) => handleChange("from", date)}
+          dateFormat="yyyy-MM-dd"
+          className="p-2 rounded bg-[#334155] text-white w-full"
+          placeholderText="Nga data"
         />
-        <input
-          type="date"
-          name="to"
-          value={filters.to}
-          onChange={handleChange}
-          className="p-2 rounded bg-[#334155]"
-          placeholder="Deri më"
+        <DatePicker
+          selected={filters.to}
+          onChange={(date) => handleChange("to", date)}
+          dateFormat="yyyy-MM-dd"
+          className="p-2 rounded bg-[#334155] text-white w-full"
+          placeholderText="Deri më"
         />
         <input
           type="number"
           name="ageMin"
           value={filters.ageMin}
-          onChange={handleChange}
+          onChange={(e) => handleChange("ageMin", e.target.value)}
           className="p-2 rounded bg-[#334155]"
           placeholder="Mosha min"
         />
@@ -91,7 +95,7 @@ const ProfitDashboard = () => {
           type="number"
           name="ageMax"
           value={filters.ageMax}
-          onChange={handleChange}
+          onChange={(e) => handleChange("ageMax", e.target.value)}
           className="p-2 rounded bg-[#334155]"
           placeholder="Mosha max"
         />

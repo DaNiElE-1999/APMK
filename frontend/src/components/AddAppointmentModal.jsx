@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
-const AddAppointmentModal = ({ onClose, onRefresh }) => {
-  const [start, setStart] = useState("");
+const AddAppointmentModal = ({ onClose }) => {
+  const [start, setStart] = useState(new Date());
   const [doctorId, setDoctorId] = useState("");
   const [patientId, setPatientId] = useState("");
   const [labId, setLabId] = useState("");
@@ -11,13 +14,20 @@ const AddAppointmentModal = ({ onClose, onRefresh }) => {
   const [labs, setLabs] = useState([]);
 
   const token = localStorage.getItem("token");
+  const navigate = useNavigate();
 
   const fetchDropdowns = async () => {
     try {
       const [doctorRes, patientRes, labRes] = await Promise.all([
-        fetch("/api/doctor", { headers: { Authorization: `Bearer ${token}` } }),
-        fetch("/api/patient", { headers: { Authorization: `Bearer ${token}` } }),
-        fetch("/api/lab", { headers: { Authorization: `Bearer ${token}` } }),
+        fetch("/api/doctor", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch("/api/patient", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch("/api/lab", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
 
       const [doctorData, patientData, labData] = await Promise.all([
@@ -41,7 +51,7 @@ const AddAppointmentModal = ({ onClose, onRefresh }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("/api/appointments", {
+      const res = await fetch("/api/appointment", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -54,9 +64,10 @@ const AddAppointmentModal = ({ onClose, onRefresh }) => {
           lab_id: labId || null,
         }),
       });
+
       if (!res.ok) throw new Error("Gabim gjatë krijimit të takimit");
-      onRefresh();
       onClose();
+      navigate("/appointments"); 
     } catch (err) {
       console.error("Gabim gjatë krijimit të takimit:", err);
     }
@@ -67,12 +78,16 @@ const AddAppointmentModal = ({ onClose, onRefresh }) => {
       <div className="bg-[#0f172a] p-6 rounded w-full max-w-md shadow-lg">
         <h2 className="text-xl font-semibold text-white mb-6">Shto Takim</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="datetime-local"
-            value={start}
-            onChange={(e) => setStart(e.target.value)}
-            required
+          <DatePicker
+            selected={start}
+            onChange={(date) => setStart(date)}
+            showTimeSelect
+            timeFormat="HH:mm"
+            timeIntervals={15}
+            dateFormat="yyyy-MM-dd HH:mm"
             className="w-full p-2 rounded bg-gray-800 text-white"
+            popperPlacement="bottom-start"
+            portalId="root"
           />
 
           <select

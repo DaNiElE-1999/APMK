@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const EditAppointmentModal = ({ appointment, onClose, onRefresh }) => {
-  const [start, setStart] = useState(appointment.start?.slice(0, 16) || "");
+  const [start, setStart] = useState(new Date(appointment.start));
   const [doctorId, setDoctorId] = useState(appointment.doctor?._id || "");
   const [patientId, setPatientId] = useState(appointment.patient?._id || "");
   const [labId, setLabId] = useState(appointment.lab?._id || "");
@@ -67,13 +69,18 @@ const EditAppointmentModal = ({ appointment, onClose, onRefresh }) => {
       <div className="bg-[#0f172a] p-6 rounded w-full max-w-md shadow-lg">
         <h2 className="text-xl font-semibold text-white mb-6">Përditëso Takimin</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="datetime-local"
-            value={start}
-            onChange={(e) => setStart(e.target.value)}
-            required
+          <DatePicker
+            selected={start}
+            onChange={(date) => setStart(date)}
+            showTimeSelect
+            timeFormat="HH:mm"
+            timeIntervals={15}
+            dateFormat="yyyy-MM-dd HH:mm"
             className="w-full p-2 rounded bg-gray-800 text-white"
+            popperPlacement="bottom-start"
+            portalId="root"
           />
+
 
           <select
             value={doctorId}
