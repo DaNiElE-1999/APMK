@@ -14,7 +14,7 @@ const Appointments = () => {
 
   const fetchAppointments = async () => {
     try {
-      const res = await fetch("/api/appointments", {
+      const res = await fetch("/api/appointment", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -27,7 +27,7 @@ const Appointments = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("A je i sigurt që do ta fshish?")) return;
     try {
-      await fetch(`/api/appointments/${id}`, {
+      await fetch(`/api/appointment/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

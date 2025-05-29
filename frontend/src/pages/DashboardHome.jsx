@@ -33,15 +33,15 @@ const DashboardHome = () => {
             headers: { Authorization: `Bearer ${token}` },
           }).then((res) => res.json()),
 
-          fetch(`/api/appointments?from=${today}&to=${today}`, {
+          fetch(`/api/appointment?from=${today}&to=${today}`, {
             headers: { Authorization: `Bearer ${token}` },
           }).then((res) => res.json()),
 
-          fetch("/api/profits/all", {
+          fetch("/api/profit/all", {
             headers: { Authorization: `Bearer ${token}` },
           }).then((res) => res.json()),
 
-          fetch("/api/appointments", {
+          fetch("/api/appointment", {
             headers: { Authorization: `Bearer ${token}` },
           }).then((res) => res.json()),
         ]);

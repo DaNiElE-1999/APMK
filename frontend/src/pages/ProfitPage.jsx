@@ -25,7 +25,7 @@ const ProfitDashboard = () => {
         from: filters.from.toISOString().split("T")[0],
         to: filters.to.toISOString().split("T")[0],
       }).toString();
-      const res = await fetch(`/api/profits/all?${query}`, {
+      const res = await fetch(`/api/profit/all?${query}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
