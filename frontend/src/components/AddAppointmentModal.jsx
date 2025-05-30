@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-const AddAppointmentModal = ({ onClose }) => {
+const AddAppointmentModal = ({ onClose, onRefresh }) => {
   const now = new Date();
   const [start, setStart] = useState(now);
-  const [end, setEnd] = useState(new Date(now.getTime() + 60 * 60 * 1000)); // Default: 1 hour later
+  const [end, setEnd] = useState(new Date(now.getTime() + 60 * 60 * 1000));
   const [doctorId, setDoctorId] = useState("");
   const [patientId, setPatientId] = useState("");
   const [labId, setLabId] = useState("");
@@ -16,7 +15,6 @@ const AddAppointmentModal = ({ onClose }) => {
   const [labs, setLabs] = useState([]);
 
   const token = localStorage.getItem("token");
-  const navigate = useNavigate();
 
   const fetchDropdowns = async () => {
     try {
@@ -65,7 +63,7 @@ const AddAppointmentModal = ({ onClose }) => {
           end: end.toISOString(),
           doctor_id: doctorId,
           patient_id: patientId,
-          lab: labId || null, // Note: Using 'lab' instead of 'lab_id' to match your API
+          lab: labId || null,
         }),
       });
 
@@ -73,8 +71,9 @@ const AddAppointmentModal = ({ onClose }) => {
       if (!res.ok) {
         throw new Error(data.message || "Failed to create appointment");
       }
+
+      if (onRefresh) onRefresh(data); 
       onClose();
-      navigate("/appointments");
     } catch (err) {
       console.error("Error:", err.message);
       alert(`Error: ${err.message}`);
@@ -93,9 +92,8 @@ const AddAppointmentModal = ({ onClose }) => {
             <DatePicker
               selected={start}
               onChange={(date) => {
-                setStart(date);
-                // Auto-adjust end time to maintain duration
                 const duration = end - start;
+                setStart(date);
                 setEnd(new Date(date.getTime() + duration));
               }}
               showTimeSelect
@@ -120,7 +118,7 @@ const AddAppointmentModal = ({ onClose }) => {
               dateFormat="yyyy-MM-dd HH:mm"
               minDate={start}
               minTime={start}
-              maxTime={new Date(start.getTime() + 24 * 60 * 60 * 1000)} // 24h max
+              maxTime={new Date(start.getTime() + 24 * 60 * 60 * 1000)}
               className="w-full p-2 rounded bg-gray-800 text-white"
               popperPlacement="bottom-start"
             />

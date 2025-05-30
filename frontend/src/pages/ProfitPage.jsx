@@ -69,20 +69,32 @@ const ProfitDashboard = () => {
         onSubmit={handleFilter}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
       >
-        <DatePicker
-          selected={filters.from}
-          onChange={(date) => handleChange("from", date)}
-          dateFormat="yyyy-MM-dd"
-          className="p-2 rounded bg-[#334155] text-white w-full"
-          placeholderText="Nga data"
-        />
-        <DatePicker
-          selected={filters.to}
-          onChange={(date) => handleChange("to", date)}
-          dateFormat="yyyy-MM-dd"
-          className="p-2 rounded bg-[#334155] text-white w-full"
-          placeholderText="Deri më"
-        />
+        <div className="relative">
+          <DatePicker
+            selected={filters.from}
+            onChange={(date) => handleChange("from", date)}
+            dateFormat="yyyy-MM-dd"
+            className="p-2 rounded bg-[#334155] text-white w-full"
+            placeholderText="Nga data"
+            popperPlacement="bottom-start"
+            portalId="root"
+            popperClassName="!ml-32 z-50"
+          />
+        </div>
+
+        <div className="relative">
+          <DatePicker
+            selected={filters.to}
+            onChange={(date) => handleChange("to", date)}
+            dateFormat="yyyy-MM-dd"
+            className="p-2 rounded bg-[#334155] text-white w-full"
+            placeholderText="Deri më"
+            popperPlacement="bottom-start"
+            portalId="root"
+            popperClassName="!ml-32 z-50"
+          />
+        </div>
+
         <input
           type="number"
           name="ageMin"

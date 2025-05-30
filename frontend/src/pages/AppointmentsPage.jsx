@@ -1,121 +1,177 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import AddAppointmentModal from "../components/AddAppointmentModal";
-import EditAppointmentModal from "../components/EditAppointmentModal";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
-const Appointments = () => {
-  const [appointments, setAppointments] = useState([]);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
+const AddAppointmentModal = ({ onClose, onRefresh }) => {
+  const now = new Date();
+  const [start, setStart] = useState(now);
+  const [end, setEnd] = useState(new Date(now.getTime() + 60 * 60 * 1000));
+  const [doctorId, setDoctorId] = useState("");
+  const [patientId, setPatientId] = useState("");
+  const [labId, setLabId] = useState("");
+
+  const [doctors, setDoctors] = useState([]);
+  const [patients, setPatients] = useState([]);
+  const [labs, setLabs] = useState([]);
 
   const token = localStorage.getItem("token");
-  const navigate = useNavigate();
 
-  const fetchAppointments = async () => {
+  const fetchDropdowns = async () => {
     try {
-      const res = await fetch("/api/appointment", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setAppointments(data);
-    } catch (error) {
-      console.error("Gabim gjatë marrjes së takimeve:", error);
-    }
-  };
+      const [doctorRes, patientRes, labRes] = await Promise.all([
+        fetch("/api/doctor", { headers: { Authorization: `Bearer ${token}` } }),
+        fetch("/api/patient", { headers: { Authorization: `Bearer ${token}` } }),
+        fetch("/api/lab", { headers: { Authorization: `Bearer ${token}` } }),
+      ]);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("A je i sigurt që do ta fshish?")) return;
-    try {
-      await fetch(`/api/appointment/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      fetchAppointments();
-    } catch (error) {
-      console.error("Gabim gjatë fshirjes së takimit:", error);
+      const [doctorData, patientData, labData] = await Promise.all([
+        doctorRes.json(),
+        patientRes.json(),
+        labRes.json(),
+      ]);
+
+      setDoctors(doctorData);
+      setPatients(patientData);
+      setLabs(labData);
+    } catch (err) {
+      console.error("Gabim në marrjen e të dhënave për dropdown:", err);
+      alert("Failed to load dropdown data");
     }
   };
 
   useEffect(() => {
-    fetchAppointments();
+    fetchDropdowns();
   }, []);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/appointment", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          start: start.toISOString(),
+          end: end.toISOString(),
+          doctor_id: doctorId,
+          patient_id: patientId,
+          lab: labId || null,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to create appointment");
+
+      if (onRefresh) onRefresh(); 
+      onClose();
+    } catch (err) {
+      console.error("Error:", err.message);
+      alert(`Error: ${err.message}`);
+    }
+  };
+
   return (
-    <div className="p-6 text-white relative">
-      <button
-        onClick={() => navigate(-1)}
-        className="absolute top-4 right-6 bg-cyan-600 text-white px-3 py-1 rounded hover:bg-cyan-700"
-      >
-        ← Kthehu
-      </button>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-[#0f172a] p-6 rounded w-full max-w-md shadow-lg">
+        <h2 className="text-xl font-semibold text-white mb-6">Shto Takim</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Fillimi</label>
+            <DatePicker
+              selected={start}
+              onChange={(date) => {
+                const duration = end - start;
+                setStart(date);
+                setEnd(new Date(date.getTime() + duration));
+              }}
+              showTimeSelect
+              timeFormat="HH:mm"
+              timeIntervals={15}
+              dateFormat="yyyy-MM-dd HH:mm"
+              className="w-full p-2 rounded bg-gray-800 text-white"
+              popperPlacement="bottom-start"
+            />
+          </div>
 
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Takimet</h1>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Shto takim
-        </button>
-      </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Mbarimi</label>
+            <DatePicker
+              selected={end}
+              onChange={(date) => setEnd(date)}
+              showTimeSelect
+              timeFormat="HH:mm"
+              timeIntervals={15}
+              dateFormat="yyyy-MM-dd HH:mm"
+              minDate={start}
+              minTime={start}
+              maxTime={new Date(start.getTime() + 24 * 60 * 60 * 1000)}
+              className="w-full p-2 rounded bg-gray-800 text-white"
+              popperPlacement="bottom-start"
+            />
+          </div>
 
-      <div className="overflow-x-auto bg-[#1e293b] rounded shadow">
-        <table className="min-w-full table-auto">
-          <thead>
-            <tr className="bg-[#334155] text-left">
-              <th className="p-3">Mjeku</th>
-              <th className="p-3">Pacienti</th>
-              <th className="p-3">Koha</th>
-              <th className="p-3">Laboratori</th>
-              <th className="p-3">Veprime</th>
-            </tr>
-          </thead>
-          <tbody>
-            {appointments.map((appt) => (
-              <tr key={appt._id} className="border-b border-gray-700">
-                <td className="p-3">{appt.doctor?.first} {appt.doctor?.last}</td>
-                <td className="p-3">{appt.patient?.first} {appt.patient?.last}</td>
-                <td className="p-3">{new Date(appt.start).toLocaleString()}</td>
-                <td className="p-3">{appt.lab?.type || "—"}</td>
-                <td className="p-3 flex gap-2">
-                  <button
-                    onClick={() => {
-                      setSelectedAppointment(appt);
-                      setShowEditModal(true);
-                    }}
-                    className="bg-yellow-500 px-3 py-1 rounded hover:bg-yellow-600"
-                  >
-                    Edito
-                  </button>
-                  <button
-                    onClick={() => handleDelete(appt._id)}
-                    className="bg-red-600 px-3 py-1 rounded hover:bg-red-700"
-                  >
-                    Fshi
-                  </button>
-                </td>
-              </tr>
+          <select
+            value={doctorId}
+            onChange={(e) => setDoctorId(e.target.value)}
+            required
+            className="w-full p-2 rounded bg-gray-800 text-white"
+          >
+            <option value="">Zgjidh Mjekun</option>
+            {doctors.map((doc) => (
+              <option key={doc._id} value={doc._id}>
+                {doc.first} {doc.last}
+              </option>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </select>
 
-      {showAddModal && (
-        <AddAppointmentModal
-          onClose={() => setShowAddModal(false)}
-          onRefresh={fetchAppointments}
-        />
-      )}
-      {showEditModal && selectedAppointment && (
-        <EditAppointmentModal
-          appointment={selectedAppointment}
-          onClose={() => setShowEditModal(false)}
-          onRefresh={fetchAppointments}
-        />
-      )}
+          <select
+            value={patientId}
+            onChange={(e) => setPatientId(e.target.value)}
+            required
+            className="w-full p-2 rounded bg-gray-800 text-white"
+          >
+            <option value="">Zgjidh Pacientin</option>
+            {patients.map((p) => (
+              <option key={p._id} value={p._id}>
+                {p.first} {p.last}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={labId}
+            onChange={(e) => setLabId(e.target.value)}
+            className="w-full p-2 rounded bg-gray-800 text-white"
+          >
+            <option value="">(Opsionale) Zgjidh Laboratorin</option>
+            {labs.map((lab) => (
+              <option key={lab._id} value={lab._id}>
+                {lab.type}
+              </option>
+            ))}
+          </select>
+
+          <div className="flex justify-end gap-4 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="bg-red-600 px-4 py-2 rounded hover:bg-red-700 text-white"
+            >
+              Anulo
+            </button>
+            <button
+              type="submit"
+              className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 text-white"
+            >
+              Shto
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
 
-export default Appointments;
+export default AddAppointmentModal;

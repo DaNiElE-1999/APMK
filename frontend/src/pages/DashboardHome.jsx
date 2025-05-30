@@ -15,7 +15,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 const DashboardHome = () => {
   const [stats, setStats] = useState({
     patients: 0,
-    appointmentsToday: 0,
+    upcomingAppointments: 0,
     monthlyRevenue: 0,
     profitGrowth: 0,
   });
@@ -25,30 +25,28 @@ const DashboardHome = () => {
 
   const fetchStats = async () => {
     try {
-      const today = new Date().toISOString().slice(0, 10);
+      const [patientsRes, profitRes, allAppointmentsRes] = await Promise.all([
+        fetch("/api/patient", {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then((res) => res.json()),
 
-      const [patientsRes, appointmentsRes, profitRes, allAppointmentsRes] =
-        await Promise.all([
-          fetch("/api/patient", {
-            headers: { Authorization: `Bearer ${token}` },
-          }).then((res) => res.json()),
+        fetch("/api/profit/all", {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then((res) => res.json()),
 
-          fetch(`/api/appointment?from=${today}&to=${today}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }).then((res) => res.json()),
+        fetch("/api/appointment", {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then((res) => res.json()),
+      ]);
 
-          fetch("/api/profit/all", {
-            headers: { Authorization: `Bearer ${token}` },
-          }).then((res) => res.json()),
-
-          fetch("/api/appointment", {
-            headers: { Authorization: `Bearer ${token}` },
-          }).then((res) => res.json()),
-        ]);
+      const now = new Date();
+      const upcoming = allAppointmentsRes.filter(
+        (appt) => new Date(appt.start) > now
+      );
 
       setStats({
         patients: patientsRes.length,
-        appointmentsToday: appointmentsRes.length,
+        upcomingAppointments: upcoming.length,
         monthlyRevenue: profitRes.total || 0,
         profitGrowth: ((profitRes.sale || 0) + (profitRes.lab || 0)) * 0.05,
       });
@@ -78,8 +76,8 @@ const DashboardHome = () => {
       color: "#00bcd4",
     },
     {
-      title: "Appointments Today",
-      value: stats.appointmentsToday,
+      title: "Upcoming Appointments",
+      value: stats.upcomingAppointments,
       icon: <FaCalendarCheck />,
       color: "#4caf50",
     },
@@ -109,7 +107,9 @@ const DashboardHome = () => {
         </div>
 
         <div className="lg:col-span-3 bg-[#1e293b] p-4 rounded shadow">
-          <h2 className="text-xl font-semibold mb-4 text-white">Kalendar i Takimeve</h2>
+          <h2 className="text-xl font-semibold mb-4 text-white">
+            Kalendar i Takimeve
+          </h2>
           <FullCalendar
             plugins={[timeGridPlugin, interactionPlugin]}
             initialView="timeGridWeek"
