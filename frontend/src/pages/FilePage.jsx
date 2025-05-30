@@ -59,7 +59,7 @@ const Files = () => {
     if (patientId) formData.append("patient_id", patientId);
 
     try {
-      const res = await fetch("/api/files", {
+      const res = await fetch("/api/file", {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -78,7 +78,7 @@ const Files = () => {
 
   const handleDownload = async (id, name, mimeType) => {
     try {
-      const res = await fetch(`/api/files/${id}`, {
+      const res = await fetch(`/api/file/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -107,7 +107,7 @@ const Files = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("A je i sigurt që do ta fshish këtë skedar?")) return;
     try {
-      const res = await fetch(`/api/files/${id}`, {
+      const res = await fetch(`/api/file/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -121,7 +121,7 @@ const Files = () => {
   const handleEdit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`/api/files/${editData._id}`, {
+      const res = await fetch(`/api/file/${editData._id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

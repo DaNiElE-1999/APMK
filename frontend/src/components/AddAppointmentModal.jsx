@@ -4,7 +4,9 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const AddAppointmentModal = ({ onClose }) => {
-  const [start, setStart] = useState(new Date());
+  const now = new Date();
+  const [start, setStart] = useState(now);
+  const [end, setEnd] = useState(new Date(now.getTime() + 60 * 60 * 1000)); // Default: 1 hour later
   const [doctorId, setDoctorId] = useState("");
   const [patientId, setPatientId] = useState("");
   const [labId, setLabId] = useState("");
@@ -41,6 +43,7 @@ const AddAppointmentModal = ({ onClose }) => {
       setLabs(labData);
     } catch (err) {
       console.error("Gabim në marrjen e të dhënave për dropdown:", err);
+      alert("Failed to load dropdown data");
     }
   };
 
@@ -58,18 +61,23 @@ const AddAppointmentModal = ({ onClose }) => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          start,
+          start: start.toISOString(),
+          end: end.toISOString(),
           doctor_id: doctorId,
           patient_id: patientId,
-          lab_id: labId || null,
+          lab: labId || null, // Note: Using 'lab' instead of 'lab_id' to match your API
         }),
       });
 
-      if (!res.ok) throw new Error("Gabim gjatë krijimit të takimit");
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to create appointment");
+      }
       onClose();
-      navigate("/appointments"); 
+      navigate("/appointments");
     } catch (err) {
-      console.error("Gabim gjatë krijimit të takimit:", err);
+      console.error("Error:", err.message);
+      alert(`Error: ${err.message}`);
     }
   };
 
@@ -78,17 +86,45 @@ const AddAppointmentModal = ({ onClose }) => {
       <div className="bg-[#0f172a] p-6 rounded w-full max-w-md shadow-lg">
         <h2 className="text-xl font-semibold text-white mb-6">Shto Takim</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <DatePicker
-            selected={start}
-            onChange={(date) => setStart(date)}
-            showTimeSelect
-            timeFormat="HH:mm"
-            timeIntervals={15}
-            dateFormat="yyyy-MM-dd HH:mm"
-            className="w-full p-2 rounded bg-gray-800 text-white"
-            popperPlacement="bottom-start"
-            portalId="root"
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">
+              Fillimi
+            </label>
+            <DatePicker
+              selected={start}
+              onChange={(date) => {
+                setStart(date);
+                // Auto-adjust end time to maintain duration
+                const duration = end - start;
+                setEnd(new Date(date.getTime() + duration));
+              }}
+              showTimeSelect
+              timeFormat="HH:mm"
+              timeIntervals={15}
+              dateFormat="yyyy-MM-dd HH:mm"
+              className="w-full p-2 rounded bg-gray-800 text-white"
+              popperPlacement="bottom-start"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">
+              Mbarimi
+            </label>
+            <DatePicker
+              selected={end}
+              onChange={(date) => setEnd(date)}
+              showTimeSelect
+              timeFormat="HH:mm"
+              timeIntervals={15}
+              dateFormat="yyyy-MM-dd HH:mm"
+              minDate={start}
+              minTime={start}
+              maxTime={new Date(start.getTime() + 24 * 60 * 60 * 1000)} // 24h max
+              className="w-full p-2 rounded bg-gray-800 text-white"
+              popperPlacement="bottom-start"
+            />
+          </div>
 
           <select
             value={doctorId}

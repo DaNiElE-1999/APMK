@@ -23,7 +23,7 @@ const UploadFileModal = ({ onClose, onRefresh }) => {
     if (patient_id) formData.append("patient_id", patient_id);
 
     try {
-      await axios.put("/api/files", formData, {
+      await axios.put("/api/file", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       onRefresh();
