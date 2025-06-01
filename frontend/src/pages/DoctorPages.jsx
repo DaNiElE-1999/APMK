@@ -42,65 +42,82 @@ const Doctors = () => {
   }, []);
 
   return (
-    <div className="p-6 text-white relative">
-      <button
-        onClick={() => navigate(-1)}
-        className="absolute top-4 right-6 bg-cyan-600 text-white px-3 py-1 rounded hover:bg-cyan-700"
-      >
-        ← Kthehu
-      </button>
+    <div className="container-fluid py-4" style={{ color: "white", backgroundColor: "#0a1a2a", minHeight: "100vh" }}>
+      {/* Back button */}
+      <div className="mb-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="btn btn-outline-light"
+        >
+          ← Kthehu
+        </button>
+      </div>
 
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Mjekët</h1>
+      {/* Header + “Add Doctor” button */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="fw-bold">Mjekët</h2>
         <button
           onClick={() => setShowAddModal(true)}
-          className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
+          className="btn btn-primary"
         >
           Shto Mjek
         </button>
       </div>
 
-      <div className="overflow-x-auto bg-[#1e293b] rounded shadow">
-        <table className="min-w-full table-auto">
-          <thead>
-            <tr className="bg-[#334155] text-left">
-              <th className="p-3">Emri</th>
-              <th className="p-3">Email</th>
-              <th className="p-3">Specialiteti</th>
-              <th className="p-3">Telefoni</th>
-              <th className="p-3">Veprime</th>
+      {/* Table */}
+      <div className="table-responsive bg-dark rounded shadow-sm">
+        <table className="table table-dark table-striped table-hover mb-0">
+          <thead className="table-secondary text-dark">
+            <tr>
+              <th scope="col" className="py-2 px-3">Emri</th>
+              <th scope="col" className="py-2 px-3">Email</th>
+              <th scope="col" className="py-2 px-3">Specialiteti</th>
+              <th scope="col" className="py-2 px-3">Telefoni</th>
+              <th scope="col" className="py-2 px-3">Veprime</th>
             </tr>
           </thead>
           <tbody>
             {doctors.map((doc) => (
-              <tr key={doc._id} className="border-b border-gray-700">
-                <td className="p-3">{doc.first} {doc.last}</td>
-                <td className="p-3">{doc.email}</td>
-                <td className="p-3">{doc.speciality}</td>
-                <td className="p-3">{doc.phone || "—"}</td>
-                <td className="p-3 flex gap-3">
-                  <button
-                    onClick={() => {
-                      setSelectedDoctor(doc);
-                      setShowEditModal(true);
-                    }}
-                    className="bg-yellow-500 px-3 py-1 rounded hover:bg-yellow-600"
-                  >
-                    Edito
-                  </button>
-                  <button
-                    onClick={() => handleDelete(doc._id)}
-                    className="bg-red-600 px-3 py-1 rounded hover:bg-red-700"
-                  >
-                    Fshi
-                  </button>
+              <tr key={doc._id}>
+                <td className="py-2 px-3">
+                  {doc.first} {doc.last}
+                </td>
+                <td className="py-2 px-3">{doc.email}</td>
+                <td className="py-2 px-3">{doc.speciality}</td>
+                <td className="py-2 px-3">{doc.phone || "—"}</td>
+                <td className="py-2 px-3">
+                  <div className="d-flex">
+                    <button
+                      onClick={() => {
+                        setSelectedDoctor(doc);
+                        setShowEditModal(true);
+                      }}
+                      className="btn btn-sm btn-warning me-2"
+                    >
+                      Edito
+                    </button>
+                    <button
+                      onClick={() => handleDelete(doc._id)}
+                      className="btn btn-sm btn-danger"
+                    >
+                      Fshi
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
+            {doctors.length === 0 && (
+              <tr>
+                <td colSpan="5" className="text-center py-4">
+                  Nuk u gjet asnjë mjek.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
+      {/* AddDoctor Modal */}
       {showAddModal && (
         <AddDoctorModal
           existingDoctors={doctors}
@@ -109,6 +126,7 @@ const Doctors = () => {
         />
       )}
 
+      {/* EditDoctor Modal */}
       {showEditModal && selectedDoctor && (
         <EditDoctorModal
           doctor={selectedDoctor}

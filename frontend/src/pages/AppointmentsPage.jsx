@@ -53,25 +53,31 @@ const Appointments = () => {
   }, []);
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Butonat: Kthehu & Shto Takim */}
-      <div className="flex items-center gap-x-4 mb-6">
-        <button
-          onClick={() => window.history.back()}
-          className="bg-gray-700 hover:bg-gray-600 text-white px-5 py-2.5 rounded-md transition transform hover:scale-105"
-        >
-          ← Kthehu
-        </button>
-
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-md transition transform hover:scale-105"
-        >
-          + Shto Takim
-        </button>
+    <div
+      className="container-fluid py-4"
+      style={{ backgroundColor: "#0a1a2a", minHeight: "100vh", color: "white" }}
+    >
+      {/* Buttons Row */}
+      <div className="row mb-4 align-items-center">
+        <div className="col-auto">
+          <button
+            onClick={() => window.history.back()}
+            className="btn btn-outline-light"
+          >
+            ← Kthehu
+          </button>
+        </div>
+        <div className="col text-end">
+          <button
+            onClick={() => setShowModal(true)}
+            className="btn btn-primary"
+          >
+            + Shto Takim
+          </button>
+        </div>
       </div>
 
-      {/* Modal për Shtim Takimi */}
+      {/* Modal for Adding Appointment */}
       {showModal && (
         <AddAppointmentModal
           onClose={() => setShowModal(false)}
@@ -79,62 +85,74 @@ const Appointments = () => {
         />
       )}
 
-      <h2 className="text-2xl font-bold text-white border-b border-gray-600 pb-2">
-        Takimet e Planifikuara
-      </h2>
+      <h2 className="fw-bold mb-3 border-bottom pb-2">Takimet e Planifikuara</h2>
 
-      {/* Tabela e Takimeve */}
       {appointments.length === 0 ? (
-        <p className="text-gray-300">Nuk ka takime të regjistruara.</p>
+        <p className="text-muted">Nuk ka takime të regjistruara.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-gray-900 text-white rounded-md overflow-hidden">
-            <thead>
-              <tr className="bg-gray-700 text-left">
-                <th className="px-4 py-2">Data</th>
-                <th className="px-4 py-2">Ora</th>
-                <th className="px-4 py-2">Mjeku</th>
-                <th className="px-4 py-2">Pacienti</th>
-                <th className="px-4 py-2">Laboratori</th>
-                <th className="px-4 py-2">Veprim</th>
+        <div className="table-responsive">
+          <table className="table table-dark table-striped table-hover mb-0 rounded">
+            <thead className="table-secondary text-dark">
+              <tr>
+                <th scope="col" className="py-2 px-3">
+                  Data
+                </th>
+                <th scope="col" className="py-2 px-3">
+                  Ora
+                </th>
+                <th scope="col" className="py-2 px-3">
+                  Mjeku
+                </th>
+                <th scope="col" className="py-2 px-3">
+                  Pacienti
+                </th>
+                <th scope="col" className="py-2 px-3">
+                  Laboratori
+                </th>
+                <th scope="col" className="py-2 px-3">
+                  Veprim
+                </th>
               </tr>
             </thead>
             <tbody>
-              {appointments.map((appt) => (
-                <tr key={appt._id} className="border-t border-gray-700 hover:bg-gray-800">
-                  <td className="px-4 py-2">
-                    {new Date(appt.start).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-2">
-                    {new Date(appt.start).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}{" "}
-                    -{" "}
-                    {new Date(appt.end).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </td>
-                  <td className="px-4 py-2">
-                    {appt.doctor?.first} {appt.doctor?.last}
-                  </td>
-                  <td className="px-4 py-2">
-                    {appt.patient?.first} {appt.patient?.last}
-                  </td>
-                  <td className="px-4 py-2">
-                    {appt.lab?.type || "-"}
-                  </td>
-                  <td className="px-4 py-2">
-                    <button
-                      onClick={() => handleDelete(appt._id)}
-                      className="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-1.5 rounded-md transition transform hover:scale-105"
-                    >
-                      🗑️ Fshi
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {appointments.map((appt) => {
+                const startDate = new Date(appt.start);
+                const endDate = new Date(appt.end);
+
+                return (
+                  <tr key={appt._id}>
+                    <td className="py-2 px-3">
+                      {startDate.toLocaleDateString()}
+                    </td>
+                    <td className="py-2 px-3">
+                      {startDate.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}{" "}
+                      -{" "}
+                      {endDate.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </td>
+                    <td className="py-2 px-3">
+                      {appt.doctor?.first} {appt.doctor?.last}
+                    </td>
+                    <td className="py-2 px-3">
+                      {appt.patient?.first} {appt.patient?.last}
+                    </td>
+                    <td className="py-2 px-3">{appt.lab?.type || "-"}</td>
+                    <td className="py-2 px-3">
+                      <button
+                        onClick={() => handleDelete(appt._id)}
+                        className="btn btn-sm btn-danger"
+                      >
+                        Fshi
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

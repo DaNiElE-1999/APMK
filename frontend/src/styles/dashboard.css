@@ -179,56 +179,111 @@ main > div {
   flex-wrap: wrap;
   margin-top: 1rem;
 }
+
 .calendar-container {
   transition: all 0.3s ease-in-out;
 }
 
+/* FullCalendar overrides */
 .fc {
-  background-color: #0f172a;
+  background-color: var(--bg-color) !important;
   border-radius: 0.75rem;
   padding: 1rem;
-  color: white;
+  color: var(--text-color);
   font-family: 'Poppins', sans-serif;
 }
 
-.fc-toolbar-title {
-  font-size: 1.4rem !important;
-  color: #f1f5f9 !important;
+.fc .fc-toolbar-title {
+  font-size: 1.5rem !important;
+  color: var(--text-color) !important;
   font-weight: 600;
 }
 
-.fc-button {
-  background-color: #3b82f6 !important;
+.fc .fc-button {
+  background-color: var(--hover-color) !important;
   border: none !important;
   border-radius: 8px !important;
   padding: 6px 12px !important;
-  color: white !important;
+  color: var(--text-color) !important;
   font-weight: 500;
-  transition: background-color 0.2s ease-in-out;
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
 }
 
-.fc-button:hover {
-  background-color: #2563eb !important;
+.fc .fc-button:hover {
+  background-color: #444 !important;
+  transform: scale(1.03);
 }
 
-.fc-event {
+.fc .fc-button.fc-button-primary {
+  background-color: var(--hover-color) !important;
+  color: var(--text-color) !important;
+  border: none !important;
+}
+
+.fc .fc-button.fc-button-primary:hover {
+  background-color: #444 !important;
+}
+
+.fc .fc-col-header {
+  background-color: var(--sidebar-color) !important;
+  border-bottom: 1px solid var(--hover-color) !important;
+}
+
+.fc .fc-col-header-cell-cushion {
+  color: var(--text-color) !important;
+  font-weight: 500;
+}
+
+.fc .fc-timegrid-axis-cushion {
+  background-color: var(--sidebar-color) !important;
+  color: var(--text-color) !important;
+  font-weight: 500;
+  padding-right: 0.5rem;
+}
+
+.fc .fc-timegrid-slot-lane > div {
+  background-color: var(--bg-color) !important;
+}
+
+.fc .fc-scrollgrid-section td {
+  border-color: var(--hover-color) !important;
+}
+
+.fc .fc-now-indicator {
+  background-color: #e11d48 !important;
+  height: 2px !important;
+}
+
+.fc .fc-event,
+.fc .fc-timegrid-event {
   background-color: #38bdf8 !important;
   border: none !important;
+  color: var(--text-color) !important;
   font-weight: 500;
-  border-radius: 10px !important;
+  border-radius: 8px !important;
   padding: 6px 10px !important;
-  box-shadow: 0 3px 8px rgba(56, 189, 248, 0.4);
-  transition: transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
 }
 
-.fc-event:hover {
+.fc .fc-event:hover,
+.fc .fc-timegrid-event:hover {
   transform: scale(1.03);
   background-color: #0ea5e9 !important;
 }
 
 .fc .fc-day-today {
-  background-color: #2f436e !important; 
-  color: #ffffff !important;
-  border: none;
+  background-color: var(--hover-color) !important;
+  color: var(--text-color) !important;
   border-radius: 6px;
+  border: none;
+}
+
+.fc .fc-scroller-liquid-absolute,
+.fc .fc-scrollgrid-section {
+  box-shadow: none !important;
+}
+
+.fc .fc-scrollgrid {
+  background-color: transparent !important;
 }

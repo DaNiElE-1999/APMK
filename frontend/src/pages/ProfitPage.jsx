@@ -12,7 +12,7 @@ const ProfitDashboard = () => {
     patient_id: "",
     doctor_id: "",
     ageMin: "",
-    ageMax: ""
+    ageMax: "",
   });
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
@@ -25,6 +25,7 @@ const ProfitDashboard = () => {
         from: filters.from.toISOString().split("T")[0],
         to: filters.to.toISOString().split("T")[0],
       }).toString();
+
       const res = await fetch(`/api/profit/all?${query}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -53,90 +54,127 @@ const ProfitDashboard = () => {
   };
 
   return (
-    <div className="p-6 text-white">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Analiza e Fitimeve</h1>
-        <button
-          onClick={() => navigate(-1)}
-          className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded"
-        >
-          Kthehu mbrapa
-        </button>
+    <div
+      className="container-fluid py-4"
+      style={{ backgroundColor: "#0a1a2a", minHeight: "100vh", color: "white" }}
+    >
+      {/* Header Row */}
+      <div className="row mb-4 align-items-center">
+        <div className="col">
+          <h1 className="fw-bold">Analiza e Fitimeve</h1>
+        </div>
+        <div className="col-auto">
+          <button
+            onClick={() => navigate(-1)}
+            className="btn btn-outline-light"
+          >
+            ← Kthehu
+          </button>
+        </div>
       </div>
 
       {/* Filter Form */}
-      <form
-        onSubmit={handleFilter}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
-      >
-        <div className="relative">
+      <form onSubmit={handleFilter} className="row g-3 mb-5">
+        {/* From Date */}
+        <div className="col-12 col-md-6 col-lg-3">
+          <label className="form-label text-white">Nga data</label>
           <DatePicker
             selected={filters.from}
             onChange={(date) => handleChange("from", date)}
             dateFormat="yyyy-MM-dd"
-            className="p-2 rounded bg-[#334155] text-white w-full"
-            placeholderText="Nga data"
-            popperPlacement="bottom-start"
-            portalId="root"
-            popperClassName="!ml-32 z-50"
+            className="form-control bg-dark text-white border-secondary"
+            placeholderText="YYYY-MM-DD"
           />
         </div>
 
-        <div className="relative">
+        {/* To Date */}
+        <div className="col-12 col-md-6 col-lg-3">
+          <label className="form-label text-white">Deri më</label>
           <DatePicker
             selected={filters.to}
             onChange={(date) => handleChange("to", date)}
             dateFormat="yyyy-MM-dd"
-            className="p-2 rounded bg-[#334155] text-white w-full"
-            placeholderText="Deri më"
-            popperPlacement="bottom-start"
-            portalId="root"
-            popperClassName="!ml-32 z-50"
+            className="form-control bg-dark text-white border-secondary"
+            placeholderText="YYYY-MM-DD"
           />
         </div>
 
-        <input
-          type="number"
-          name="ageMin"
-          value={filters.ageMin}
-          onChange={(e) => handleChange("ageMin", e.target.value)}
-          className="p-2 rounded bg-[#334155]"
-          placeholder="Mosha min"
-        />
-        <input
-          type="number"
-          name="ageMax"
-          value={filters.ageMax}
-          onChange={(e) => handleChange("ageMax", e.target.value)}
-          className="p-2 rounded bg-[#334155]"
-          placeholder="Mosha max"
-        />
-        <button
-          type="submit"
-          className="col-span-full md:col-span-1 bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Apliko Filtra
-        </button>
+        {/* Age Minimum */}
+        <div className="col-12 col-md-6 col-lg-3">
+          <label htmlFor="ageMin" className="form-label text-white">
+            Mosha Min
+          </label>
+          <input
+            type="number"
+            id="ageMin"
+            name="ageMin"
+            value={filters.ageMin}
+            onChange={(e) => handleChange("ageMin", e.target.value)}
+            className="form-control bg-dark text-white border-secondary"
+            placeholder="Shembull: 18"
+          />
+        </div>
+
+        {/* Age Maximum */}
+        <div className="col-12 col-md-6 col-lg-3">
+          <label htmlFor="ageMax" className="form-label text-white">
+            Mosha Max
+          </label>
+          <input
+            type="number"
+            id="ageMax"
+            name="ageMax"
+            value={filters.ageMax}
+            onChange={(e) => handleChange("ageMax", e.target.value)}
+            className="form-control bg-dark text-white border-secondary"
+            placeholder="Shembull: 65"
+          />
+        </div>
+
+        {/* Filter Button */}
+        <div className="col-12 text-end">
+          <button type="submit" className="btn btn-primary">
+            Apliko Filtra
+          </button>
+        </div>
       </form>
 
       {/* Results */}
       {loading ? (
-        <p>Duke ngarkuar të dhënat...</p>
+        <p className="text-muted">Duke ngarkuar të dhënat...</p>
       ) : (
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-[#1e293b] p-6 rounded shadow">
-            <h2 className="text-lg font-semibold">Fitim nga Shitjet</h2>
-            <p className="text-xl mt-2">€ {data.sale.toFixed(2)}</p>
+        <div className="row g-4">
+          <div className="col-12 col-md-4">
+            <div className="card bg-dark text-white h-100 shadow-sm">
+              <div className="card-body">
+                <h5 className="card-title">Fitim nga Shitjet</h5>
+                <p className="card-text display-6 mt-3">
+                  € {data.sale.toFixed(2)}
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="bg-[#1e293b] p-6 rounded shadow">
-            <h2 className="text-lg font-semibold">Fitim nga Laboratori</h2>
-            <p className="text-xl mt-2">€ {data.lab.toFixed(2)}</p>
+
+          <div className="col-12 col-md-4">
+            <div className="card bg-dark text-white h-100 shadow-sm">
+              <div className="card-body">
+                <h5 className="card-title">Fitim nga Laboratori</h5>
+                <p className="card-text display-6 mt-3">
+                  € {data.lab.toFixed(2)}
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="bg-[#1e293b] p-6 rounded shadow">
-            <h2 className="text-lg font-semibold">Totali</h2>
-            <p className="text-xl mt-2 font-bold text-green-400">
-              € {data.total.toFixed(2)}
-            </p>
+
+          <div className="col-12 col-md-4">
+            <div className="card bg-dark text-white h-100 shadow-sm">
+              <div className="card-body">
+                <h5 className="card-title">Totali</h5>
+                <p className="card-text display-6 mt-3 text-success">
+                  € {data.total.toFixed(2)}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       )}

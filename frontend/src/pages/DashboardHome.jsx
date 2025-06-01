@@ -45,14 +45,16 @@ const DashboardHome = () => {
       );
 
       setStats({
-        patients: patientsRes.length,
-        upcomingAppointments: upcoming.length,
+        patients: Array.isArray(patientsRes) ? patientsRes.length : 0,
+        upcomingAppointments: Array.isArray(upcoming) ? upcoming.length : 0,
         monthlyRevenue: profitRes.total || 0,
         profitGrowth: ((profitRes.sale || 0) + (profitRes.lab || 0)) * 0.05,
       });
 
       const formattedEvents = allAppointmentsRes.map((a) => ({
-        title: `${a.patient?.first || "Pacient"} me ${a.doctor?.first || "Mjek"}`,
+        title: `${a.patient?.first || "Pacient"} me ${
+          a.doctor?.first || "Mjek"
+        }`,
         start: a.start,
         end: new Date(new Date(a.start).getTime() + 60 * 60 * 1000),
         backgroundColor: "#38bdf8",
@@ -97,35 +99,89 @@ const DashboardHome = () => {
 
   return (
     <DashboardLayout>
+      {/* Force the main heading to remain white */}
       <h1 className="text-3xl font-bold mb-6 text-white">Dashboard</h1>
 
-      <div className="grid gap-6 lg:grid-cols-4 mb-8">
-        <div className="lg:col-span-1 sm:col-span-2 grid gap-6">
-          {statCards.map((item) => (
-            <StatCard key={item.title} {...item} />
-          ))}
-        </div>
+      {/* Inline override so FullCalendar’s toolbar/buttons remain white on dark */}
+      <style>
+        {`
+          .fc .fc-toolbar-chunk,
+          .fc .fc-button {
+            color: white !important;
+          }
+        `}
+      </style>
 
-        <div className="lg:col-span-3 p-6 rounded-2xl shadow-xl calendar-container bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-gray-700">
-          <h2 className="text-2xl font-semibold mb-4 text-white border-b border-gray-600 pb-2">
-            Kalendar i Takimeve
-          </h2>
-          <FullCalendar
-            plugins={[timeGridPlugin, interactionPlugin]}
-            initialView="timeGridWeek"
-            headerToolbar={{
-              left: "prev,next today",
-              center: "title",
-              right: "timeGridDay,timeGridWeek",
-            }}
-            slotMinTime="08:00:00"
-            slotMaxTime="18:00:00"
-            nowIndicator={true}
-            eventDisplay="block"
-            height="auto"
-            themeSystem="standard"
-            events={events}
-          />
+      {/* ─────────────────────────────────────────────────────────────
+          OUTER WRAPPER: A single dark “card” that contains both stats & calendar
+          ───────────────────────────────────────────────────────────── */}
+      <div className="bg-dark p-4 rounded-2xl shadow-xl border border-secondary">
+        <div className="row g-4">
+          {/* ────────────────────────────────
+              LEFT COLUMN: Stats
+              ──────────────────────────────── */}
+          <div className="col-lg-3">
+            {/* 
+              Instead of wrapping ALL stats in one flat black panel, 
+              we let each StatCard live in its own “inner card” with bg-secondary.
+              We use a small inner grid so cards stack nicely with spacing.
+            */}
+            <div className="row row-cols-1 g-3">
+              {statCards.map((item) => (
+                <div key={item.title} className="col">
+                  <div className="bg-secondary text-white p-3 rounded shadow-sm h-100">
+                    {/* 
+                      You can keep using your existing StatCard component,
+                      or—if you want full control—uncomment the JSX below 
+                      and style your icon/text manually. 
+                    
+                    <StatCard 
+                      title={item.title}
+                      value={item.value}
+                      icon={item.icon}
+                      color={item.color}
+                    />
+                    */}
+
+                    {/* If your StatCard already includes its own wrapper styling, 
+                        just use it directly; e.g.: */}
+                    <StatCard
+                      title={item.title}
+                      value={item.value}
+                      icon={item.icon}
+                      color={item.color}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ────────────────────────────────
+              RIGHT COLUMN: Calendar
+              ──────────────────────────────── */}
+          <div className="col-lg-9">
+            <h2 className="text-2xl font-semibold mb-4 border-b border-gray-600 pb-2 text-white">
+              Kalendar i Takimeve
+            </h2>
+            <FullCalendar
+              plugins={[timeGridPlugin, interactionPlugin]}
+              initialView="timeGridWeek"
+              headerToolbar={{
+                left: "prev,next today",
+                center: "title",
+                right: "timeGridDay,timeGridWeek",
+              }}
+              slotMinTime="08:00:00"
+              slotMaxTime="18:00:00"
+              nowIndicator={true}
+              eventDisplay="block"
+              height="auto"
+              themeSystem="standard"
+              events={events}
+              contentHeight="auto"
+            />
+          </div>
         </div>
       </div>
     </DashboardLayout>

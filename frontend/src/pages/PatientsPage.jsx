@@ -47,69 +47,92 @@ const Patients = () => {
   }, []);
 
   return (
-    <div className="p-6 text-white">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Pacientët</h1>
-        <div className="flex gap-4">
+    <div
+      className="container-fluid py-4"
+      style={{ backgroundColor: "#0a1a2a", minHeight: "100vh", color: "white" }}
+    >
+      {/* Header Row */}
+      <div className="row mb-4 align-items-center">
+        <div className="col">
+          <h1 className="fw-bold">Pacientët</h1>
+        </div>
+        <div className="col-auto">
           <button
             onClick={() => navigate(-1)}
-            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded"
+            className="btn btn-outline-light"
           >
-            Kthehu mbrapa
-          </button>
-          <button
-            onClick={() => setShowAdd(true)}
-            className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Shto Pacient
+            ← Kthehu
           </button>
         </div>
       </div>
 
-      <div className="overflow-x-auto bg-[#1e293b] rounded shadow">
-        <table className="min-w-full">
-          <thead className="bg-[#334155]">
-            <tr>
-              <th className="p-3 text-left">Emri</th>
-              <th className="p-3 text-left">Email</th>
-              <th className="p-3 text-left">Tel</th>
-              <th className="p-3 text-left">Mosha</th>
-              <th className="p-3 text-left">Veprime</th>
-            </tr>
-          </thead>
-          <tbody>
-            {patients.map((p) => (
-              <tr key={p._id} className="border-b border-gray-700">
-                <td className="p-3">{p.first} {p.last}</td>
-                <td className="p-3">{p.email}</td>
-                <td className="p-3">{p.phone || "—"}</td>
-                <td className="p-3">{p.age}</td>
-                <td className="p-3 flex gap-2">
-                  <button
-                    onClick={() => {
-                      setSelected(p);
-                      setShowEdit(true);
-                    }}
-                    className="bg-yellow-500 px-3 py-1 rounded hover:bg-yellow-600"
-                  >
-                    Edito
-                  </button>
-                  <button
-                    onClick={() => handleDelete(p._id)}
-                    className="bg-red-600 px-3 py-1 rounded hover:bg-red-700"
-                  >
-                    Fshi
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Add Button */}
+      <div className="row mb-3">
+        <div className="col text-end">
+          <button
+            onClick={() => setShowAdd(true)}
+            className="btn btn-primary"
+          >
+            + Shto Pacient
+          </button>
+        </div>
       </div>
 
-      {showAdd && (
-        <AddPatientModal onClose={() => setShowAdd(false)} onRefresh={fetchPatients} />
+      {/* Table of Patients */}
+      {patients.length === 0 ? (
+        <p className="text-muted">Nuk ka pacientë të regjistruar.</p>
+      ) : (
+        <div className="table-responsive">
+          <table className="table table-dark table-striped table-hover mb-0 rounded">
+            <thead className="table-secondary text-dark">
+              <tr>
+                <th scope="col" className="py-2 px-3">Emri</th>
+                <th scope="col" className="py-2 px-3">Email</th>
+                <th scope="col" className="py-2 px-3">Tel</th>
+                <th scope="col" className="py-2 px-3">Mosha</th>
+                <th scope="col" className="py-2 px-3">Veprim</th>
+              </tr>
+            </thead>
+            <tbody>
+              {patients.map((p) => (
+                <tr key={p._id}>
+                  <td className="py-2 px-3">{p.first} {p.last}</td>
+                  <td className="py-2 px-3">{p.email}</td>
+                  <td className="py-2 px-3">{p.phone || "—"}</td>
+                  <td className="py-2 px-3">{p.age}</td>
+                  <td className="py-2 px-3">
+                    <button
+                      onClick={() => {
+                        setSelected(p);
+                        setShowEdit(true);
+                      }}
+                      className="btn btn-sm btn-warning me-2"
+                    >
+                      Edito
+                    </button>
+                    <button
+                      onClick={() => handleDelete(p._id)}
+                      className="btn btn-sm btn-danger"
+                    >
+                      Fshi
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
+
+      {/* AddPatient Modal */}
+      {showAdd && (
+        <AddPatientModal
+          onClose={() => setShowAdd(false)}
+          onRefresh={fetchPatients}
+        />
+      )}
+
+      {/* EditPatient Modal */}
       {showEdit && selected && (
         <EditPatientModal
           patient={selected}

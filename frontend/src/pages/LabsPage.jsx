@@ -47,65 +47,92 @@ const Labs = () => {
   }, []);
 
   return (
-    <div className="p-6 text-white relative">
-      {/* Butoni i kthimit */}
-      <button
-        onClick={() => navigate(-1)}
-        className="absolute top-4 right-6 bg-cyan-600 text-white px-3 py-1 rounded hover:bg-cyan-700"
-      >
-        ← Kthehu
-      </button>
-
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Analizat Laboratorike</h1>
-        <button
-          onClick={() => setShowAdd(true)}
-          className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Shto Analizë
-        </button>
+    <div
+      className="container-fluid py-4"
+      style={{ backgroundColor: "#0a1a2a", minHeight: "100vh", color: "white" }}
+    >
+      {/* Row with “Back” and “Add Lab” */}
+      <div className="row mb-4 align-items-center">
+        <div className="col-auto">
+          <button
+            onClick={() => navigate(-1)}
+            className="btn btn-outline-light"
+          >
+            ← Kthehu
+          </button>
+        </div>
+        <div className="col text-end">
+          <button
+            onClick={() => setShowAdd(true)}
+            className="btn btn-primary"
+          >
+            + Shto Analizë
+          </button>
+        </div>
       </div>
 
-      <div className="overflow-x-auto bg-[#1e293b] rounded shadow">
-        <table className="min-w-full">
-          <thead className="bg-[#334155]">
-            <tr>
-              <th className="p-3 text-left">Lloji</th>
-              <th className="p-3 text-left">Kosto (€)</th>
-              <th className="p-3 text-left">Veprime</th>
-            </tr>
-          </thead>
-          <tbody>
-            {labs.map((lab) => (
-              <tr key={lab._id} className="border-b border-gray-700">
-                <td className="p-3">{lab.type}</td>
-                <td className="p-3">{lab.cost.toFixed(2)}</td>
-                <td className="p-3 flex gap-2">
-                  <button
-                    onClick={() => {
-                      setSelected(lab);
-                      setShowEdit(true);
-                    }}
-                    className="bg-yellow-500 px-3 py-1 rounded hover:bg-yellow-600"
-                  >
-                    Edito
-                  </button>
-                  <button
-                    onClick={() => handleDelete(lab._id)}
-                    className="bg-red-600 px-3 py-1 rounded hover:bg-red-700"
-                  >
-                    Fshi
-                  </button>
-                </td>
+      {/* Section Header */}
+      <h2 className="fw-bold mb-3 border-bottom pb-2">
+        Analizat Laboratorike
+      </h2>
+
+      {/* Empty State */}
+      {labs.length === 0 ? (
+        <p className="text-muted">Nuk ka analiza të regjistruara.</p>
+      ) : (
+        <div className="table-responsive">
+          <table className="table table-dark table-striped table-hover mb-0 rounded">
+            <thead className="table-secondary text-dark">
+              <tr>
+                <th scope="col" className="py-2 px-3">
+                  Lloji
+                </th>
+                <th scope="col" className="py-2 px-3">
+                  Kosto (€)
+                </th>
+                <th scope="col" className="py-2 px-3">
+                  Veprime
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {showAdd && (
-        <AddLabModal onClose={() => setShowAdd(false)} onRefresh={fetchLabs} />
+            </thead>
+            <tbody>
+              {labs.map((lab) => (
+                <tr key={lab._id}>
+                  <td className="py-2 px-3">{lab.type}</td>
+                  <td className="py-2 px-3">{lab.cost.toFixed(2)}</td>
+                  <td className="py-2 px-3">
+                    <button
+                      onClick={() => {
+                        setSelected(lab);
+                        setShowEdit(true);
+                      }}
+                      className="btn btn-sm btn-warning me-2"
+                    >
+                      Edito
+                    </button>
+                    <button
+                      onClick={() => handleDelete(lab._id)}
+                      className="btn btn-sm btn-danger"
+                    >
+                      Fshi
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
+
+      {/* AddLab Modal */}
+      {showAdd && (
+        <AddLabModal
+          onClose={() => setShowAdd(false)}
+          onRefresh={fetchLabs}
+        />
+      )}
+
+      {/* EditLab Modal */}
       {showEdit && selected && (
         <EditLabModal
           lab={selected}

@@ -35,12 +35,10 @@ const Files = () => {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
-
       const [doctorData, patientData] = await Promise.all([
         doctorRes.json(),
         patientRes.json(),
       ]);
-
       setDoctors(doctorData);
       setPatients(patientData);
     } catch (err) {
@@ -64,9 +62,7 @@ const Files = () => {
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
-
       if (!res.ok) throw new Error("Ngarkimi dështoi");
-
       setFile(null);
       setDoctorId("");
       setPatientId("");
@@ -84,7 +80,6 @@ const Files = () => {
       const data = await res.json();
       const byteCharacters = atob(data.data);
       const byteArrays = [];
-
       for (let offset = 0; offset < byteCharacters.length; offset += 512) {
         const slice = byteCharacters.slice(offset, offset + 512);
         const byteNumbers = new Array(slice.length);
@@ -93,7 +88,6 @@ const Files = () => {
         }
         byteArrays.push(new Uint8Array(byteNumbers));
       }
-
       const blob = new Blob(byteArrays, { type: mimeType });
       const link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
@@ -147,86 +141,260 @@ const Files = () => {
   }, []);
 
   return (
-    <div className="p-6 text-white relative">
-      <button
-        onClick={() => navigate(-1)}
-        className="absolute top-4 right-6 bg-cyan-600 text-white px-3 py-1 rounded hover:bg-cyan-700"
-      >
-        ← Kthehu
-      </button>
+    <div
+      className="container-fluid py-4"
+      style={{ backgroundColor: "#0a1a2a", minHeight: "100vh", color: "white" }}
+    >
+      {/* Header Row */}
+      <div className="row mb-4 align-items-center">
+        <div className="col">
+          <h1 className="fw-bold">Skedarët</h1>
+        </div>
+        <div className="col-auto">
+          <button
+            onClick={() => navigate(-1)}
+            className="btn btn-outline-light"
+          >
+            ← Kthehu
+          </button>
+        </div>
+      </div>
 
-      <h1 className="text-2xl font-bold mb-6">Skedarët</h1>
+      {/* Upload Form */}
+      <form onSubmit={handleUpload} className="row g-3 mb-5">
+        {/* File Input */}
+        <div className="col-12 col-md-6 col-lg-3">
+          <label htmlFor="fileInput" className="form-label text-white">
+            Zgjidh Skedarin
+          </label>
+          <input
+            type="file"
+            id="fileInput"
+            onChange={(e) => setFile(e.target.files[0])}
+            className="form-control bg-dark text-white border-secondary"
+          />
+        </div>
 
-      <form onSubmit={handleUpload} className="mb-8 space-y-4">
-        <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+        {/* Doctor Select */}
+        <div className="col-12 col-md-6 col-lg-3">
+          <label htmlFor="doctorSelect" className="form-label text-white">
+            Zgjidh Mjekun
+          </label>
+          <select
+            id="doctorSelect"
+            value={doctorId}
+            onChange={(e) => setDoctorId(e.target.value)}
+            className="form-select bg-dark text-white border-secondary"
+          >
+            <option value="">Zgjidh Mjekun</option>
+            {doctors.map((doc) => (
+              <option key={doc._id} value={doc._id}>
+                {doc.first} {doc.last}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <select
-          value={doctorId}
-          onChange={(e) => setDoctorId(e.target.value)}
-          className="w-full px-3 py-2 rounded bg-gray-700"
-        >
-          <option value="">Zgjidh Mjekun</option>
-          {doctors.map((doc) => (
-            <option key={doc._id} value={doc._id}>
-              {doc.first} {doc.last}
-            </option>
-          ))}
-        </select>
+        {/* Patient Select */}
+        <div className="col-12 col-md-6 col-lg-3">
+          <label htmlFor="patientSelect" className="form-label text-white">
+            Zgjidh Pacientin
+          </label>
+          <select
+            id="patientSelect"
+            value={patientId}
+            onChange={(e) => setPatientId(e.target.value)}
+            className="form-select bg-dark text-white border-secondary"
+          >
+            <option value="">Zgjidh Pacientin</option>
+            {patients.map((p) => (
+              <option key={p._id} value={p._id}>
+                {p.first} {p.last}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <select
-          value={patientId}
-          onChange={(e) => setPatientId(e.target.value)}
-          className="w-full px-3 py-2 rounded bg-gray-700"
-        >
-          <option value="">Zgjidh Pacientin</option>
-          {patients.map((p) => (
-            <option key={p._id} value={p._id}>
-              {p.first} {p.last}
-            </option>
-          ))}
-        </select>
-
-        <button
-          type="submit"
-          className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Ngarko
-        </button>
+        {/* Upload Button */}
+        <div className="col-12 col-md-6 col-lg-3 d-flex align-items-end">
+          <button type="submit" className="btn btn-primary w-100">
+            Ngarko
+          </button>
+        </div>
       </form>
 
-      <h2 className="text-xl font-semibold mb-3">Lista e Skedarëve</h2>
-      <ul className="space-y-3">
-        {files.map((f) => (
-          <li
-            key={f._id}
-            className="bg-gray-800 p-4 rounded flex justify-between items-center"
-          >
-            <div>
-              <p className="font-bold">{f.name || f.filename}</p>
-              {f.doctor_id && (
-                <p className="text-sm">Mjek: {f.doctor_id?.first} {f.doctor_id?.last}</p>
-              )}
-              {f.patient_id && (
-                <p className="text-sm">Pacient: {f.patient_id?.first} {f.patient_id?.last}</p>
-              )}
+      {/* File List Table */}
+      {files.length === 0 ? (
+        <p className="text-muted">Nuk ka skedarë të ngarkuar.</p>
+      ) : (
+        <div className="table-responsive">
+          <table className="table table-dark table-striped table-hover mb-0 rounded">
+            <thead className="table-secondary text-dark">
+              <tr>
+                <th scope="col" className="py-2 px-3">
+                  Emri
+                </th>
+                <th scope="col" className="py-2 px-3">
+                  Mjeku
+                </th>
+                <th scope="col" className="py-2 px-3">
+                  Pacienti
+                </th>
+                <th scope="col" className="py-2 px-3">
+                  Veprime
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {files.map((f) => (
+                <tr key={f._id}>
+                  <td className="py-2 px-3">{f.name || f.filename}</td>
+                  <td className="py-2 px-3">
+                    {f.doctor_id
+                      ? `${f.doctor_id.first} ${f.doctor_id.last}`
+                      : "—"}
+                  </td>
+                  <td className="py-2 px-3">
+                    {f.patient_id
+                      ? `${f.patient_id.first} ${f.patient_id.last}`
+                      : "—"}
+                  </td>
+                  <td className="py-2 px-3">
+                    <button
+                      onClick={() =>
+                        handleDownload(
+                          f._id,
+                          f.name || f.filename,
+                          f.mimeType
+                        )
+                      }
+                      className="btn btn-sm btn-success me-2"
+                    >
+                      Shkarko
+                    </button>
+                    <button
+                      onClick={() => handleDelete(f._id)}
+                      className="btn btn-sm btn-danger me-2"
+                    >
+                      Fshi
+                    </button>
+                    <button
+                      onClick={() => setEditData(f)}
+                      className="btn btn-sm btn-warning"
+                    >
+                      Edito
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Edit Modal (conditionally shown) */}
+      {editData && (
+        <div
+          className="modal fade show"
+          style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content bg-dark text-white">
+              <div className="modal-header border-bottom-secondary">
+                <h5 className="modal-title">Përditëso Skedarin</h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={() => setEditData(null)}
+                ></button>
+              </div>
+              <form onSubmit={handleEdit}>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label htmlFor="editName" className="form-label">
+                      Emri
+                    </label>
+                    <input
+                      id="editName"
+                      type="text"
+                      className="form-control bg-dark text-white border-secondary"
+                      value={editData.name || ""}
+                      onChange={(e) =>
+                        setEditData({ ...editData, name: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="editDoctor" className="form-label">
+                      Mjeku
+                    </label>
+                    <select
+                      id="editDoctor"
+                      className="form-select bg-dark text-white border-secondary"
+                      value={editData.doctor_id?._id || ""}
+                      onChange={(e) =>
+                        setEditData({
+                          ...editData,
+                          doctor_id: doctors.find(
+                            (d) => d._id === e.target.value
+                          ) || null,
+                        })
+                      }
+                    >
+                      <option value="">Pa Mjek</option>
+                      {doctors.map((doc) => (
+                        <option key={doc._id} value={doc._id}>
+                          {doc.first} {doc.last}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="editPatient" className="form-label">
+                      Pacienti
+                    </label>
+                    <select
+                      id="editPatient"
+                      className="form-select bg-dark text-white border-secondary"
+                      value={editData.patient_id?._id || ""}
+                      onChange={(e) =>
+                        setEditData({
+                          ...editData,
+                          patient_id: patients.find(
+                            (p) => p._id === e.target.value
+                          ) || null,
+                        })
+                      }
+                    >
+                      <option value="">Pa Pacient</option>
+                      {patients.map((p) => (
+                        <option key={p._id} value={p._id}>
+                          {p.first} {p.last}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="modal-footer border-top-secondary">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setEditData(null)}
+                  >
+                    Anulo
+                  </button>
+                  <button type="submit" className="btn btn-warning">
+                    Ruaj Ndryshimet
+                  </button>
+                </div>
+              </form>
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleDownload(f._id, f.name || f.filename, f.mimeType)}
-                className="bg-green-600 px-3 py-1 rounded hover:bg-green-700"
-              >
-                Shkarko
-              </button>
-              <button
-                onClick={() => handleDelete(f._id)}
-                className="bg-red-600 px-3 py-1 rounded hover:bg-red-700"
-              >
-                Fshi
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

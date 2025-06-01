@@ -47,68 +47,84 @@ const Medicines = () => {
   }, []);
 
   return (
-    <div className="p-6 text-white">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Barnat</h1>
-        <div className="flex gap-4">
+    <div
+      className="container-fluid py-4"
+      style={{ backgroundColor: "#0a1a2a", minHeight: "100vh", color: "white" }}
+    >
+      {/* Row: Back + Add */}
+      <div className="row mb-4 align-items-center">
+        <div className="col-auto">
           <button
             onClick={() => navigate(-1)}
-            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded"
+            className="btn btn-outline-light"
           >
-            Kthehu mbrapa
+            ← Kthehu
           </button>
+        </div>
+        <div className="col text-end">
           <button
             onClick={() => setShowAdd(true)}
-            className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
+            className="btn btn-primary"
           >
-            Shto Bar
+            + Shto Bar
           </button>
         </div>
       </div>
 
-      <div className="overflow-x-auto bg-[#1e293b] rounded shadow">
-        <table className="min-w-full">
-          <thead className="bg-[#334155]">
-            <tr>
-              <th className="p-3 text-left">Emri</th>
-              <th className="p-3 text-left">Çmimi (€)</th>
-              <th className="p-3 text-left">Veprime</th>
-            </tr>
-          </thead>
-          <tbody>
-            {medicines.map((med) => (
-              <tr key={med._id} className="border-b border-gray-700">
-                <td className="p-3">{med.name}</td>
-                <td className="p-3">{med.cost.toFixed(2)}</td>
-                <td className="p-3 flex gap-2">
-                  <button
-                    onClick={() => {
-                      setSelected(med);
-                      setShowEdit(true);
-                    }}
-                    className="bg-yellow-500 px-3 py-1 rounded hover:bg-yellow-600"
-                  >
-                    Edito
-                  </button>
-                  <button
-                    onClick={() => handleDelete(med._id)}
-                    className="bg-red-600 px-3 py-1 rounded hover:bg-red-700"
-                  >
-                    Fshi
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {/* Section Header */}
+      <h2 className="fw-bold mb-3 border-bottom pb-2">Barnat</h2>
 
+      {/* Empty State */}
+      {medicines.length === 0 ? (
+        <p className="text-muted">Nuk ka medikamente të regjistruara.</p>
+      ) : (
+        <div className="table-responsive">
+          <table className="table table-dark table-striped table-hover mb-0 rounded">
+            <thead className="table-secondary text-dark">
+              <tr>
+                <th scope="col" className="py-2 px-3">Emri</th>
+                <th scope="col" className="py-2 px-3">Çmimi (€)</th>
+                <th scope="col" className="py-2 px-3">Veprim</th>
+              </tr>
+            </thead>
+            <tbody>
+              {medicines.map((med) => (
+                <tr key={med._id}>
+                  <td className="py-2 px-3">{med.name}</td>
+                  <td className="py-2 px-3">{med.cost.toFixed(2)}</td>
+                  <td className="py-2 px-3">
+                    <button
+                      onClick={() => {
+                        setSelected(med);
+                        setShowEdit(true);
+                      }}
+                      className="btn btn-sm btn-warning me-2"
+                    >
+                      Edito
+                    </button>
+                    <button
+                      onClick={() => handleDelete(med._id)}
+                      className="btn btn-sm btn-danger"
+                    >
+                      Fshi
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* AddMedicine Modal */}
       {showAdd && (
         <AddMedicineModal
           onClose={() => setShowAdd(false)}
           onRefresh={fetchMedicines}
         />
       )}
+
+      {/* EditMedicine Modal */}
       {showEdit && selected && (
         <EditMedicineModal
           medicine={selected}

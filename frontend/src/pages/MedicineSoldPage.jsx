@@ -23,18 +23,31 @@ const MedicineSoldList = () => {
   const fetchData = async () => {
     try {
       const [salesRes, patRes, docRes, medRes] = await Promise.all([
-        fetch("/api/medicine_sold", { headers: { Authorization: `Bearer ${token}` } }),
-        fetch("/api/patient", { headers: { Authorization: `Bearer ${token}` } }),
-        fetch("/api/doctor", { headers: { Authorization: `Bearer ${token}` } }),
-        fetch("/api/medicine", { headers: { Authorization: `Bearer ${token}` } }),
+        fetch("/api/medicine_sold", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch("/api/patient", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch("/api/doctor", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch("/api/medicine", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
 
-      const [sales, patientsData, doctorsData, medicinesData] = await Promise.all([
-        salesRes.json(),
-        patRes.json(),
-        docRes.json(),
-        medRes.json(),
-      ]);
+      if (!salesRes.ok || !patRes.ok || !docRes.ok || !medRes.ok) {
+        throw new Error("Gabim në marrjen e të dhënave");
+      }
+
+      const [sales, patientsData, doctorsData, medicinesData] =
+        await Promise.all([
+          salesRes.json(),
+          patRes.json(),
+          docRes.json(),
+          medRes.json(),
+        ]);
 
       setRecords(sales);
       setPatients(patientsData);
@@ -89,118 +102,188 @@ const MedicineSoldList = () => {
   }, []);
 
   return (
-    <div className="p-6 text-white">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Histori Shitjesh të Barnave</h1>
-        <button
-          onClick={() => navigate(-1)}
-          className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded"
-        >
-          Kthehu mbrapa
-        </button>
+    <div
+      className="container-fluid py-4"
+      style={{ backgroundColor: "#0a1a2a", minHeight: "100vh", color: "white" }}
+    >
+      {/* Header Row */}
+      <div className="row mb-4 align-items-center">
+        <div className="col">
+          <h1 className="fw-bold">Histori Shitjesh të Barnave</h1>
+        </div>
+        <div className="col-auto">
+          <button
+            onClick={() => navigate(-1)}
+            className="btn btn-outline-light"
+          >
+            ← Kthehu
+          </button>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="mb-6 space-y-4">
-        <select
-          value={formData.patient_id}
-          onChange={(e) => setFormData({ ...formData, patient_id: e.target.value })}
-          required
-          className="w-full px-3 py-2 rounded bg-gray-700"
-        >
-          <option value="">Zgjidh Pacientin</option>
-          {patients.map((p) => (
-            <option key={p._id} value={p._id}>
-              {p.first} {p.last}
-            </option>
-          ))}
-        </select>
+      {/* Form to Add Sale */}
+      <form onSubmit={handleSubmit} className="row g-3 mb-5">
+        {/* Patient Select */}
+        <div className="col-12 col-md-6 col-lg-3">
+          <label htmlFor="patientSelect" className="form-label text-white">
+            Zgjidh Pacientin
+          </label>
+          <select
+            id="patientSelect"
+            value={formData.patient_id}
+            onChange={(e) =>
+              setFormData({ ...formData, patient_id: e.target.value })
+            }
+            required
+            className="form-select bg-dark text-white border-secondary"
+          >
+            <option value="">Zgjidh Pacientin</option>
+            {patients.map((p) => (
+              <option key={p._id} value={p._id}>
+                {p.first} {p.last}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <select
-          value={formData.doctor_id}
-          onChange={(e) => setFormData({ ...formData, doctor_id: e.target.value })}
-          required
-          className="w-full px-3 py-2 rounded bg-gray-700"
-        >
-          <option value="">Zgjidh Mjekun</option>
-          {doctors.map((d) => (
-            <option key={d._id} value={d._id}>
-              {d.first} {d.last}
-            </option>
-          ))}
-        </select>
+        {/* Doctor Select */}
+        <div className="col-12 col-md-6 col-lg-3">
+          <label htmlFor="doctorSelect" className="form-label text-white">
+            Zgjidh Mjekun
+          </label>
+          <select
+            id="doctorSelect"
+            value={formData.doctor_id}
+            onChange={(e) =>
+              setFormData({ ...formData, doctor_id: e.target.value })
+            }
+            required
+            className="form-select bg-dark text-white border-secondary"
+          >
+            <option value="">Zgjidh Mjekun</option>
+            {doctors.map((d) => (
+              <option key={d._id} value={d._id}>
+                {d.first} {d.last}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <select
-          value={formData.medicine_id}
-          onChange={(e) => setFormData({ ...formData, medicine_id: e.target.value })}
-          required
-          className="w-full px-3 py-2 rounded bg-gray-700"
-        >
-          <option value="">Zgjidh Barnën</option>
-          {medicines.map((m) => (
-            <option key={m._id} value={m._id}>
-              {m.name}
-            </option>
-          ))}
-        </select>
+        {/* Medicine Select */}
+        <div className="col-12 col-md-6 col-lg-3">
+          <label htmlFor="medicineSelect" className="form-label text-white">
+            Zgjidh Barnën
+          </label>
+          <select
+            id="medicineSelect"
+            value={formData.medicine_id}
+            onChange={(e) =>
+              setFormData({ ...formData, medicine_id: e.target.value })
+            }
+            required
+            className="form-select bg-dark text-white border-secondary"
+          >
+            <option value="">Zgjidh Barnën</option>
+            {medicines.map((m) => (
+              <option key={m._id} value={m._id}>
+                {m.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <input
-          type="number"
-          value={formData.quantity}
-          onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
-          min={1}
-          required
-          placeholder="Sasia"
-          className="w-full px-3 py-2 rounded bg-gray-700"
-        />
+        {/* Quantity Input */}
+        <div className="col-12 col-md-6 col-lg-3">
+          <label htmlFor="quantityInput" className="form-label text-white">
+            Sasia
+          </label>
+          <input
+            type="number"
+            id="quantityInput"
+            value={formData.quantity}
+            onChange={(e) =>
+              setFormData({ ...formData, quantity: parseInt(e.target.value) })
+            }
+            min={1}
+            required
+            className="form-control bg-dark text-white border-secondary"
+            placeholder="Sasia"
+          />
+        </div>
 
-        <DatePicker
-              selected={formData.time_sold}
-              onChange={(date) => setFormData({ ...formData, time_sold: date })}
-              showTimeSelect
-              timeFormat="HH:mm"
-              timeIntervals={15}
-              dateFormat="yyyy-MM-dd HH:mm"
-              className="w-full px-3 py-2 rounded bg-gray-700 text-white"
-              popperPlacement="bottom-start"
-              portalId="root"
-        />
+        {/* Time Sold DatePicker */}
+        <div className="col-12 col-md-6 col-lg-3">
+          <label htmlFor="timeSoldPicker" className="form-label text-white">
+            Data & Ora e Shitjes
+          </label>
+          <DatePicker
+            selected={formData.time_sold}
+            onChange={(date) =>
+              setFormData({ ...formData, time_sold: date })
+            }
+            showTimeSelect
+            timeFormat="HH:mm"
+            timeIntervals={15}
+            dateFormat="yyyy-MM-dd HH:mm"
+            id="timeSoldPicker"
+            className="form-control bg-dark text-white border-secondary"
+            placeholderText="Zgjidh datën dhe orën"
+          />
+        </div>
 
-
-        <button type="submit" className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">
-          Shto Shitje
-        </button>
+        {/* Submit Button */}
+        <div className="col-12 text-end">
+          <button type="submit" className="btn btn-primary">
+            Shto Shitje
+          </button>
+        </div>
       </form>
 
-      <div className="overflow-x-auto bg-[#1e293b] rounded shadow">
-        <table className="min-w-full table-auto">
-          <thead className="bg-[#334155]">
+      {/* Table of Records */}
+      <div className="table-responsive">
+        <table className="table table-dark table-striped table-hover mb-0 rounded">
+          <thead className="table-secondary text-dark">
             <tr>
-              <th className="p-3 text-left">Pacienti</th>
-              <th className="p-3 text-left">Mjeku</th>
-              <th className="p-3 text-left">Medikamenti</th>
-              <th className="p-3 text-left">Sasia</th>
-              <th className="p-3 text-left">Data e shitjes</th>
-              <th className="p-3 text-left">Veprime</th>
+              <th scope="col" className="py-2 px-3">
+                Pacienti
+              </th>
+              <th scope="col" className="py-2 px-3">
+                Mjeku
+              </th>
+              <th scope="col" className="py-2 px-3">
+                Medikamenti
+              </th>
+              <th scope="col" className="py-2 px-3">
+                Sasia
+              </th>
+              <th scope="col" className="py-2 px-3">
+                Data e Shitjes
+              </th>
+              <th scope="col" className="py-2 px-3">
+                Veprim
+              </th>
             </tr>
           </thead>
           <tbody>
             {records.map((r) => (
-              <tr key={r._id} className="border-b border-gray-700">
-                <td className="p-3">
+              <tr key={r._id}>
+                <td className="py-2 px-3">
                   {r.patient?.first} {r.patient?.last} ({r.patient?.age} vjeç)
                 </td>
-                <td className="p-3">
+                <td className="py-2 px-3">
                   {r.doctor?.first} {r.doctor?.last} ({r.doctor?.speciality})
                 </td>
-                <td className="p-3">
+                <td className="py-2 px-3">
                   {r.medicine?.name} - €{r.medicine?.cost?.toFixed(2)}
                 </td>
-                <td className="p-3">{r.quantity}</td>
-                <td className="p-3">{new Date(r.time_sold).toLocaleString()}</td>
-                <td className="p-3">
+                <td className="py-2 px-3">{r.quantity}</td>
+                <td className="py-2 px-3">
+                  {new Date(r.time_sold).toLocaleString()}
+                </td>
+                <td className="py-2 px-3">
                   <button
                     onClick={() => handleDelete(r._id)}
-                    className="bg-red-600 px-3 py-1 rounded hover:bg-red-700"
+                    className="btn btn-sm btn-danger"
                   >
                     Fshi
                   </button>
