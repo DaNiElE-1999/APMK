@@ -72,7 +72,7 @@ const AddAppointmentModal = ({ onClose, onRefresh }) => {
         throw new Error(data.message || "Failed to create appointment");
       }
 
-      if (onRefresh) onRefresh(data); 
+      if (onRefresh) onRefresh(data);
       onClose();
     } catch (err) {
       console.error("Error:", err.message);
@@ -80,15 +80,18 @@ const AddAppointmentModal = ({ onClose, onRefresh }) => {
     }
   };
 
+  const minSelectableTime = new Date();
+  minSelectableTime.setHours(8, 0, 0, 0);
+  const maxSelectableTime = new Date();
+  maxSelectableTime.setHours(17, 0, 0, 0);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-[#0f172a] p-6 rounded w-full max-w-md shadow-lg">
         <h2 className="text-xl font-semibold text-white mb-6">Shto Takim</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Fillimi
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Fillimi</label>
             <DatePicker
               selected={start}
               onChange={(date) => {
@@ -100,15 +103,15 @@ const AddAppointmentModal = ({ onClose, onRefresh }) => {
               timeFormat="HH:mm"
               timeIntervals={15}
               dateFormat="yyyy-MM-dd HH:mm"
-              className="w-full p-2 rounded bg-gray-800 text-white"
+              className="w-full p-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
               popperPlacement="bottom-start"
+              minTime={minSelectableTime}
+              maxTime={maxSelectableTime}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Mbarimi
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Mbarimi</label>
             <DatePicker
               selected={end}
               onChange={(date) => setEnd(date)}
@@ -117,53 +120,62 @@ const AddAppointmentModal = ({ onClose, onRefresh }) => {
               timeIntervals={15}
               dateFormat="yyyy-MM-dd HH:mm"
               minDate={start}
-              minTime={start}
-              maxTime={new Date(start.getTime() + 24 * 60 * 60 * 1000)}
-              className="w-full p-2 rounded bg-gray-800 text-white"
+              minTime={minSelectableTime}
+              maxTime={maxSelectableTime}
+              className="w-full p-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
               popperPlacement="bottom-start"
             />
           </div>
 
-          <select
-            value={doctorId}
-            onChange={(e) => setDoctorId(e.target.value)}
-            required
-            className="w-full p-2 rounded bg-gray-800 text-white"
-          >
-            <option value="">Zgjidh Mjekun</option>
-            {doctors.map((doc) => (
-              <option key={doc._id} value={doc._id}>
-                {doc.first} {doc.last}
-              </option>
-            ))}
-          </select>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Zgjidh Mjekun</label>
+            <select
+              value={doctorId}
+              onChange={(e) => setDoctorId(e.target.value)}
+              required
+              className="w-full p-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            >
+              <option value="">Kliko</option>
+              {doctors.map((doc) => (
+                <option key={doc._id} value={doc._id}>
+                  {doc.first} {doc.last}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <select
-            value={patientId}
-            onChange={(e) => setPatientId(e.target.value)}
-            required
-            className="w-full p-2 rounded bg-gray-800 text-white"
-          >
-            <option value="">Zgjidh Pacientin</option>
-            {patients.map((p) => (
-              <option key={p._id} value={p._id}>
-                {p.first} {p.last}
-              </option>
-            ))}
-          </select>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Zgjidh Pacientin</label>
+            <select
+              value={patientId}
+              onChange={(e) => setPatientId(e.target.value)}
+              required
+              className="w-full p-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            >
+              <option value="">Kliko</option>
+              {patients.map((p) => (
+                <option key={p._id} value={p._id}>
+                  {p.first} {p.last}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <select
-            value={labId}
-            onChange={(e) => setLabId(e.target.value)}
-            className="w-full p-2 rounded bg-gray-800 text-white"
-          >
-            <option value="">(Opsionale) Zgjidh Laboratorin</option>
-            {labs.map((lab) => (
-              <option key={lab._id} value={lab._id}>
-                {lab.type}
-              </option>
-            ))}
-          </select>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Zgjidh Laboratorin (opsionale)</label>
+            <select
+              value={labId}
+              onChange={(e) => setLabId(e.target.value)}
+              className="w-full p-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              <option value="">Kliko</option>
+              {labs.map((lab) => (
+                <option key={lab._id} value={lab._id}>
+                  {lab.type}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="flex justify-end gap-4 pt-2">
             <button
