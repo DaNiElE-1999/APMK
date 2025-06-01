@@ -79,50 +79,66 @@ const Appointments = () => {
         />
       )}
 
-      {/* Titulli */}
       <h2 className="text-2xl font-bold text-white border-b border-gray-600 pb-2">
         Takimet e Planifikuara
       </h2>
 
-      {/* Lista e Takimeve */}
-      <div className="space-y-4">
-        {appointments.length === 0 ? (
-          <p className="text-gray-300">Nuk ka takime të regjistruara.</p>
-        ) : (
-          appointments.map((appt) => (
-            <div
-              key={appt._id}
-              className="bg-gray-800 rounded-lg p-5 shadow-md hover:shadow-lg transition-shadow"
-            >
-              <p className="mb-1 text-sm text-gray-200">
-                <strong>Data:</strong>{" "}
-                {new Date(appt.start).toLocaleDateString()}{" "}
-                {new Date(appt.start).toLocaleTimeString()} -{" "}
-                {new Date(appt.end).toLocaleTimeString()}
-              </p>
-              <p className="mb-1 text-sm text-gray-200">
-                <strong>Mjeku:</strong> {appt.doctor_id?.first} {appt.doctor_id?.last}
-              </p>
-              <p className="mb-1 text-sm text-gray-200">
-                <strong>Pacienti:</strong> {appt.patient_id?.first} {appt.patient_id?.last}
-              </p>
-              {appt.lab && (
-                <p className="text-sm text-gray-200">
-                  <strong>Laboratori:</strong> {appt.lab?.type}
-                </p>
-              )}
-              <div className="mt-3">
-                <button
-                  onClick={() => handleDelete(appt._id)}
-                  className="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-1.5 rounded-md transition transform hover:scale-105"
-                >
-                  🗑️ Fshi
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+      {/* Tabela e Takimeve */}
+      {appointments.length === 0 ? (
+        <p className="text-gray-300">Nuk ka takime të regjistruara.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-gray-900 text-white rounded-md overflow-hidden">
+            <thead>
+              <tr className="bg-gray-700 text-left">
+                <th className="px-4 py-2">Data</th>
+                <th className="px-4 py-2">Ora</th>
+                <th className="px-4 py-2">Mjeku</th>
+                <th className="px-4 py-2">Pacienti</th>
+                <th className="px-4 py-2">Laboratori</th>
+                <th className="px-4 py-2">Veprim</th>
+              </tr>
+            </thead>
+            <tbody>
+              {appointments.map((appt) => (
+                <tr key={appt._id} className="border-t border-gray-700 hover:bg-gray-800">
+                  <td className="px-4 py-2">
+                    {new Date(appt.start).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-2">
+                    {new Date(appt.start).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}{" "}
+                    -{" "}
+                    {new Date(appt.end).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </td>
+                  <td className="px-4 py-2">
+                    {appt.doctor?.first} {appt.doctor?.last}
+                  </td>
+                  <td className="px-4 py-2">
+                    {appt.patient?.first} {appt.patient?.last}
+                  </td>
+                  <td className="px-4 py-2">
+                    {appt.lab?.type || "-"}
+                  </td>
+                  <td className="px-4 py-2">
+                    <button
+                      onClick={() => handleDelete(appt._id)}
+                      className="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-1.5 rounded-md transition transform hover:scale-105"
+                    >
+                      🗑️ Fshi
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };
