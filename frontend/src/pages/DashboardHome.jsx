@@ -97,17 +97,17 @@ const DashboardHome = () => {
 
   return (
     <DashboardLayout>
-      <h1 className="text-2xl font-bold mb-4 text-white">Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Dashboard</h1>
 
-      <div className="grid gap-6 lg:grid-cols-4">
+      <div className="grid gap-6 lg:grid-cols-4 mb-8">
         <div className="lg:col-span-1 sm:col-span-2 grid gap-6">
           {statCards.map((item) => (
             <StatCard key={item.title} {...item} />
           ))}
         </div>
 
-        <div className="lg:col-span-3 bg-[#1e293b] p-4 rounded shadow">
-          <h2 className="text-xl font-semibold mb-4 text-white">
+        <div className="lg:col-span-3 p-6 rounded-2xl shadow-xl calendar-container bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-gray-700">
+          <h2 className="text-2xl font-semibold mb-4 text-white border-b border-gray-600 pb-2">
             Kalendar i Takimeve
           </h2>
           <FullCalendar
