@@ -19,23 +19,42 @@ export const createAppointment: RequestHandler<{}, {}, CreateAppointmentBody> = 
       return;
     }
 
-    /* Create appointment */
-    let appt;
+    const startDate = new Date(start);
+    const endDate   = new Date(end);
+
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      res.status(400).json({ message: 'start and end must be valid ISO date strings' });
+      return;
+    }
+
+    const withinClinicHours = (d: Date) => {
+      const h = d.getHours();
+      return h >= 8 && h < 17;           // 08:00-16:59
+    };
+
+    if (!withinClinicHours(startDate) || !withinClinicHours(endDate)) {
+      res.status(400).json({ message: 'Appointments must be between 08:00 and 17:00' });
+      return;
+    }
+
+    if (startDate >= endDate) {
+      res.status(400).json({ message: 'end must be after start' });
+      return;
+    }
+
     try {
-      appt = await AppointmentModel.create({
-        start: new Date(start),
-        end:   new Date(end),
+      const appt = await AppointmentModel.create({
+        start: startDate,
+        end:   endDate,
         doctor_id,
         patient_id,
         lab,
       });
+      res.status(201).json(appt);
     } catch (err) {
       console.error('[createAppointment] create error:', err);
       res.status(500).json({ message: 'Database error' });
-      return;
     }
-
-    res.status(201).json(appt);
   }
 );
 
