@@ -194,8 +194,39 @@ const Files = () => {
         </button>
       </form>
 
-      {/* pjesa tjetër mbetet e pandryshuar për listimin, edito, shkarko, fshi */}
-      ...
+      <h2 className="text-xl font-semibold mb-3">Lista e Skedarëve</h2>
+      <ul className="space-y-3">
+        {files.map((f) => (
+          <li
+            key={f._id}
+            className="bg-gray-800 p-4 rounded flex justify-between items-center"
+          >
+            <div>
+              <p className="font-bold">{f.name || f.filename}</p>
+              {f.doctor_id && (
+                <p className="text-sm">Mjek: {f.doctor_id?.first} {f.doctor_id?.last}</p>
+              )}
+              {f.patient_id && (
+                <p className="text-sm">Pacient: {f.patient_id?.first} {f.patient_id?.last}</p>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleDownload(f._id, f.name || f.filename, f.mimeType)}
+                className="bg-green-600 px-3 py-1 rounded hover:bg-green-700"
+              >
+                Shkarko
+              </button>
+              <button
+                onClick={() => handleDelete(f._id)}
+                className="bg-red-600 px-3 py-1 rounded hover:bg-red-700"
+              >
+                Fshi
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
